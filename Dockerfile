@@ -51,12 +51,12 @@ COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 # Copy supervisor config
 COPY docker/supervisord.conf /etc/supervisord.conf
 
-# Expose port
-EXPOSE 8000
-
 # Copy start script
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
+
+# Expose port
+EXPOSE 8000
 
 # Start via start script (migrations + supervisor)
 CMD ["/usr/local/bin/start.sh"]

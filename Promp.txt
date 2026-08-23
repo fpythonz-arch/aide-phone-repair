@@ -1,0 +1,138 @@
+j'ai fini le backend et le frontend,  j'ai ouvert  le projet dans vscode, donc je veux que tu me guide etape par etape pour la suite, tous les fichiers sont dejà là , avant que tu me propose quelque chose, je te donne les fichiers etape par etape pour que tu me guide ,donc maintenant, ici http://localhost:5173/diagnostic, on verra tous les marques d'appareil, 15 marque avec 10 modèle pour chacun. En realite, lorsqu'on choisi une marque et un exemple de modèle, on doit pouvoir tous les symtptoms possible lies à ce appareil, ensuite, en fonction de chaque symtoms , on verra tous les causes probables,  et enfin, on propose des solution, les solutions sont "commerce la reparation" etape par etape et "un guide complet qui regroupes les ressources lie à chaque  symptom
+avec tes années d'experiences, donne tous les necesssaire pour ce projet, tous ce que tu trouve sur internet, recupère,meme sur google et plus, prend tous   
+
+
+
+
+
+
+⚠️ IMPORTANT
+mais mon backend n'as pas des routes pour /depannage. je veux  que tu cree les contrôleurs pour depannage.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+j'ai fini le backend et le frontend,  j'ai ouvert  le projet dans vscode, donc je veux que tu me guide etape par etape pour la suite, tous les fichiers sont dejà là , avant que tu me propose quelque chose, je te donne les fichiers etape par etape pour que tu me guide ,donc maintenant, je n'arrive pas à acceder cette page  http://localhost:5173/depannage , dans cette page,  on verra deux types de depannage depannage software et depannage hardware. En realite, lorsqu'on choisi un types de depannage , on doit pouvoir tous les tous les depannages possible lies à un telephone, smartphone, android, apple, ensuite, en fonction de chaque pannes , on verra les  toutes les solutions possibles ,  et enfin, on propose des solution, avec deux boutons "commerce la reparation"  qui montre etape par etape la reparation du telephone  et bouton  "un guide complet qui regroupes les ressources lie à chaque  pannes telques video, liens et tout
+avec tes années d'experiences, donne tous les necesssaire pour ce projet, tous ce que tu trouve sur internet, recupère,meme sur google et plus, prend tous     voici les erreur actuel
+
+
+
+
+
+
+j'ai fini le backend et le frontend,  j'ai ouvert  le projet dans vscode, donc je veux que tu me guide etape par etape pour la suite, tous les fichiers sont dejà là , avant que tu me propose quelque chose, je te donne les fichiers etape par etape pour que tu me guide ,donc maintenant, ici dans cette page  http://localhost:5173/depannage , voici ce que je veux 
+avec tes années d'experiences, donne tous les necesssaire pour ce projet, tous ce que tu trouve sur internet, recupère,meme sur google et plus, prend tous
+
+
+
+
+
+
+
+$components
+
+// === ALIMENTATION ===
+            [
+                'name' => 'Batterie Li-ion / Li-Po',
+                'slug' => 'batterie',
+                'category' => 'alimentation',
+                'description' => 'Batterie lithium-ion ou lithium-polymère. 4000-6000 mAh. Inclut le BMS (Battery Management System).',
+                'common_failures' => ['Gonflement', 'Autonomie réduite', 'Chauffe excessive', 'Extinction à 20-30%', 'Dégradation après 500 cycles'],
+                'replacement_difficulty' => 2,
+                'price_range' => ['min' => 15, 'max' => 60, 'currency' => 'EUR'],
+                'technical_specs' => ['type' => 'Li-Po', 'removable' => true, 'capacity' => '4000-6000mAh'],
+                'compatible_devices' => ['Tous smartphones'],
+                'availability' => 'in_stock',
+            ],
+            [
+                'name' => 'Circuit de charge (PMIC)',
+                'slug' => 'circuit-charge',
+                'category' => 'alimentation',
+                'description' => 'Power Management IC gérant la charge, la distribution d\'énergie et la protection de la batterie.',
+                'common_failures' => ['Ne charge plus', 'Charge lente', 'Surchauffe en charge', 'Reboots aléatoires'],
+                'replacement_difficulty' => 5,
+                'price_range' => ['min' => 50, 'max' => 120, 'currency' => 'EUR'],
+                'technical_specs' => ['type' => 'PMIC', 'removable' => true, 'tech' => 'BGA/QFN'],
+                'compatible_devices' => ['Smartphones haut de gamme'],
+                'availability' => 'special_order',
+            ],
+            [
+                'name' => 'Connecteur de charge (USB-C)',
+                'slug' => 'connecteur-usb-c',
+                'category' => 'alimentation',
+                'description' => 'Port USB-C pour charge et transfert. Supporte USB 2.0 à 3.2 et Power Delivery.',
+                'common_failures' => ['Ne charge plus', 'Charge intermittente', 'Débris dans le port', 'Broches tordues', 'Transfert impossible'],
+                'replacement_difficulty' => 3,
+                'price_range' => ['min' => 5, 'max' => 30, 'currency' => 'EUR'],
+                'technical_specs' => ['type' => 'USB-C', 'removable' => true, 'specs' => 'USB 2.0-3.2, PD'],
+                'compatible_devices' => ['Tous smartphones modernes'],
+                'availability' => 'in_stock',
+            ],
+            [
+                'name' => 'Bobine de charge sans fil',
+                'slug' => 'charge-sans-fil',
+                'category' => 'alimentation',
+                'description' => 'Bobine d\'induction pour charge Qi sans fil (5W à 50W). Positionnée sous le dos du téléphone.',
+                'common_failures' => ['Charge sans fil inactive', 'Chauffe excessive', 'Positionnement difficile'],
+                'replacement_difficulty' => 4,
+                'price_range' => ['min' => 15, 'max' => 40, 'currency' => 'EUR'],
+                'technical_specs' => ['type' => 'Qi', 'removable' => true, 'power' => '5-50W'],
+                'compatible_devices' => ['Smartphones haut de gamme avec Qi'],
+                'availability' => 'in_stock',
+            ],
+
+
+
+$guides
+
+     [
+                'symptom_id' => 1,
+                'component_id' => Component::where('slug', 'batterie')->first()->id,
+                'title' => 'Remplacement batterie iPhone/Samsung',
+                'description' => 'Guide étape par étape pour remplacer une batterie de smartphone en toute sécurité.',
+                'steps' => json_encode([
+                    'Éteindre et retirer vis du bas',
+                    'Chauffer adhésifs avec iOpener',
+                    'Retirer ancienne batterie (spatules plastique)',
+                    'Nettoyer châssis, poser nouveaux adhésifs',
+                    'Installer nouvelle batterie, reconnecter nappe',
+                    'Réassembler et vérifier BMS'
+                ]),
+                'required_tools' => json_encode(['Tournevis Pentalobe', 'Spatules plastique', 'iOpener', 'Ventouse', 'Adhésifs batterie']),
+                'required_parts' => json_encode(['Batterie compatible', 'Adhésifs batterie']),
+                'difficulty_level' => 3,
+                'estimated_time_minutes' => 45,
+                'warnings' => json_encode(['Ne pas percer la batterie', 'Risque d\'incendie']),
+                'success_rate' => 95.00,
+                'is_published' => true,
+            ],
+
+
+$Parts
+
+
+[
+            'component_id' => Component::where('slug', 'batterie')->first()->id,
+            'repair_guide_id' => RepairGuide::where('title', 'Remplacement batterie iPhone/Samsung')->first()->id,
+            'name' => 'Batterie Samsung S24 Ultra',
+            'sku' => 'SAM-BAT-S24U',
+            'description' => 'Batterie Li-Po 5000 mAh pour Samsung Galaxy S24 Ultra',
+            'price' => 38.00,
+            'currency' => 'EUR',
+            'supplier' => 'Samsung Parts',
+            'supplier_url' => 'https://samsung.com',
+            'quality_grade' => 'OEM',
+            'warranty_months' => 12,
+            'stock_status' => 'available',
+            'compatibility_notes' => json_encode(['Samsung Galaxy S24 Ultra']),
+        ],

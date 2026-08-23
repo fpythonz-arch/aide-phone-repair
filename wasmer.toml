@@ -1,0 +1,11 @@
+[package]
+name = "fpythonz-arch/aide-phone-repair-backend"
+version = "0.1.0"
+description = "Aide Phone Reparation Backend"
+
+[[module]]
+name = "backend"
+source = "public/index.php"
+
+[fs]
+"." = "/"

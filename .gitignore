@@ -1,25 +1,23 @@
-# Dependencies
-backend/vendor/
-frontend/node_modules/
+# Laravel
+/vendor/
+/node_modules/
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/bootstrap/cache/*.php
+.env
+.phpunit.result.cache
 
-# Environment files (on garde .env.example mais pas .env)
-backend/.env
-frontend/.env
-# .env.production peut être inclus (pas de secrets, juste l'URL)
+# Frontend
+/frontend/node_modules/
+/frontend/dist/
 
-# Laravel cache & storage
-backend/bootstrap/cache/*.php
-backend/storage/logs/*.log
-backend/storage/framework/cache/*
-backend/storage/framework/sessions/*
-backend/storage/framework/views/*
-backend/.phpunit.result.cache
-
-# SQLite local DB
-backend/database/database.sqlite
-
-# Frontend build
-frontend/dist/
+# SQLite
+/database/database.sqlite
 
 # OS
 .DS_Store

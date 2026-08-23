@@ -1,0 +1,169 @@
+DEPLOIEMENT
+
+Composant	Plateforme	Gratuit	Carte requise
+Frontend Vue	Vercel       ✅	❌ Non
+Backend Laravel	Koyeb	     ✅	❌ Non
+Base de données	Supabase     ✅	❌ Non
+
+
+le token de aide-phone-repair sur github
+
+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
+
+
+SUPABASE pour la base de donnee
+
+Organisation :                        Org de fpythonz-arch
+nom du projet:                        fpythonz-arch's Project
+ID projet    :                        rztrcsydxuybdavgoock
+Mot de passe de la base de donne:     fpy@6190.Fpy
+
+
+clé public :                    sb_publishable_WYEtr-xFp-Pe-rSoXfdr6A_CO1Gor6N
+
+anon public:                    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6dHJjc3lkeHV5YmRhdmdvb2NrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0ODMyMDgsImV4cCI6MjEwMzA1OTIwOH0.W87Xlw_Uri5LpYyzbjwvnrvk9r2H5XD3vfTCt_k1bgk
+
+
+API URL   :                     https://rztrcsydxuybdavgoock.supabase.co/rest/v1/
+
+
+
+Wasmer	✅ PHP/Laravel natif	✅ 100k req/mois	✅ pour le backend
+
+PROPRIETAIRE   :                       fpythonz-arch
+LIEN DU PROJET :                       aide-phone-repair
+nom du projet  :
+
+variable d'environnement: env
+
+APP_NAME="AIDE PHONE REPARATION"
+APP_ENV=production
+APP_KEY=base64:hTsdSp922oFMXZC2jN6/BmevsaZVEQX+vm6vzNCa4Go=
+APP_DEBUG=false
+DB_CONNECTION=pgsql
+DB_HOST=db.rztrcsydxuybdavgoock.supabase.co
+DB_PORT=5432
+DB_DATABASE=postgres
+DB_USERNAME=postgres
+DB_PASSWORD=fpy@6190.Fpy
+DB_SSLMODE=require
+SESSION_DRIVER=cookie
+CACHE_STORE=array
+QUEUE_CONNECTION=sync
+LOG_CHANNEL=stderr
+LOG_LEVEL=error
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+A revoir  
+
+accordait une attention extrême aux détails. Il se préoccupait du design, de la simplicité, de la fonctionnalité et de l’expérience de l’utilisateur.
+
+
+La qualité ne consiste pas uniquement à remplacer une pièce. Elle consiste aussi à établir un diagnostic précis, protéger les données du client, expliquer clairement le problème, tester l’appareil et le remettre dans un état impeccable.
+
+imaginait la manière dont la technologie pouvait transformer la vie des gens.
+
+Quel problème voulons-nous résoudre ?
+Quel avenir voulons-nous créer ?
+Pourquoi cette mission est-elle importante ?
+
+ne dis pas seulement aux gens ce qu’ils doivent faire. Explique-leur pourquoi cela est important.
+Explique ce que ton client pourra faire après ton intervention.
+
+s’engagent pour une mission qui a du sens.
+
+
+priorité était le produit, le client, l’équipe et la qualité de l’expérience.
+
+
+Comment puis-je résoudre un problème réel mieux qu’avant ? 
+
+
+Un service de réparation informatique qui mise sur la confiance, la précision, la transparence et la durabilité peut construire une clientèle fidèle.
+
+
+Non aux produits inutiles.
+Non aux fonctionnalités superflues.
+
+
+ne présentait pas uniquement des caractéristiques techniques. La marque vendait aussi la créativité, la simplicité, la liberté et l’identité.
+
+
+Il achète :
+du temps gagné ;
+de la confiance ;
+du confort ;
+de la sécurité ;
+de la simplicité ;
+une meilleure version de lui-même.
+
+
+Il permet à quelqu’un de travailler.
+D’étudier.
+De communiquer.
+De gérer son entreprise.
+
+
+Il protège la qualité.
+
+Il crée une véritable expérience pour ses clients.
+
+la clarté.
+
+Protège la qualité
+
+
+donner aux autres la possibilité de progresser.
+
+1.	écouter les avis des utilisateurs
+
+
+•	créer de la valeur ;
+•	créer des emplois ;
+•	résoudre un problème ;
+•	transmettre des compétences ;
+•	améliorer la vie des clients.
+
+rendre une technologie accessible.
+former un jeune
+
+Elle représente une expérience et une promesse.
+
+les clients doivent savoir à quoi s’attendre : qualité, sérieux, rapidité, innovation ou proximité.
+
+
+
+
+
+
+

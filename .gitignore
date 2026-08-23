@@ -1,0 +1,31 @@
+# Dependencies
+backend/vendor/
+frontend/node_modules/
+
+# Environment files (on garde .env.example mais pas .env)
+backend/.env
+frontend/.env
+# .env.production peut être inclus (pas de secrets, juste l'URL)
+
+# Laravel cache & storage
+backend/bootstrap/cache/*.php
+backend/storage/logs/*.log
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/.phpunit.result.cache
+
+# SQLite local DB
+backend/database/database.sqlite
+
+# Frontend build
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

@@ -117,8 +117,8 @@ Route::prefix('tools')->group(function () {
     Route::get('/for-repair', [ToolController::class, 'forRepair']);
     Route::post('/check-inventory', [ToolController::class, 'checkInventory']);
     Route::get('/starter-kit', [ToolController::class, 'starterKit']);
-    Route::get('/tools', [ToolController::class, 'index']);
-    Route::post('/tools/{slug}/execute', [ToolController::class, 'execute']);
+    Route::get('/', [ToolController::class, 'index']);
+    Route::post('/{slug}/execute', [ToolController::class, 'execute']);
 });
 
 /*
@@ -150,6 +150,23 @@ Route::prefix('symptoms')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('depannage')->group(function () {
-    Route::get('/categories', [DepannageController::class, 'categories']);  // ← D'ABORD les routes spécifiques
-    Route::get('/{type}', [DepannageController::class, 'show']);            // ← ENSUITE le paramètre générique
+    Route::get('/categories', [DepannageController::class, 'categories']);
+    Route::get('/{type}', [DepannageController::class, 'show']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Resources Routes (fallback - données locales)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('resources')->group(function () {
+    Route::get('/', function () {
+        return response()->json(['data' => [], 'message' => 'No resources available']);
+    });
+    Route::get('/by-type/{type}', function () {
+        return response()->json(['data' => []]);
+    });
+    Route::get('/by-category/{category}', function () {
+        return response()->json(['data' => []]);
+    });
 });

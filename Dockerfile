@@ -1,6 +1,6 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-cli-alpine
 
-# Install system dependencies
+# Install dependencies
 RUN apk add --no-cache \
     nginx \
     supervisor \
@@ -13,7 +13,8 @@ RUN apk add --no-cache \
     unzip \
     git \
     postgresql-dev \
-    oniguruma-dev
+    oniguruma-dev \
+    bash
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -22,28 +23,26 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         pdo_pgsql \
         pgsql \
         mbstring \
-        exif \
-        pcntl \
         bcmath \
         gd \
         zip \
-        opcache
+        opcache \
+        pcntl
 
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www
+WORKDIR /app
 
-# Copy application files
+# Copy files first, then install
 COPY . .
 
-# Install PHP dependencies (production only)
+# Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
 # Copy nginx config
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
@@ -51,12 +50,10 @@ COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 # Copy supervisor config
 COPY docker/supervisord.conf /etc/supervisord.conf
 
-# Copy start script
+# Copy and set start script
 COPY docker/start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-# Expose port
-EXPOSE 8000
+EXPOSE 8080
 
-# Start via start script (migrations + supervisor)
 CMD ["/usr/local/bin/start.sh"]

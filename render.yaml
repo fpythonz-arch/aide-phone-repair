@@ -5,7 +5,6 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
-    plan: free
     envVars:
       - key: APP_NAME
         value: "AIDE PHONE REPARATION"
@@ -66,7 +65,6 @@ services:
     runtime: static
     staticPublishPath: ./frontend/dist
     buildCommand: cd frontend && npm install && npm run build
-    plan: free
     envVars:
       - key: VITE_API_URL
         fromService:

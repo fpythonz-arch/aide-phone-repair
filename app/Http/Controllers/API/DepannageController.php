@@ -93,10 +93,28 @@ class DepannageController extends Controller
         $guide = $guides[$type] ?? null;
 
         if (!$guide) {
+            // Retourner une réponse générique pour les types non encore implémentés
+            $allCategories = $this->categories()->getData(true)['data'];
+            $category = collect($allCategories)->firstWhere('slug', $type);
+
+            if (!$category) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Type de dépannage non trouvé',
+                ], 404);
+            }
+
             return response()->json([
-                'success' => false,
-                'message' => 'Type de dépannage non trouvé',
-            ], 404);
+                'success' => true,
+                'data' => [
+                    'id' => $category['id'],
+                    'category' => $category,
+                    'symptoms' => [],
+                    'commonCauses' => [],
+                    'steps' => [],
+                    'solutions' => [],
+                ],
+            ]);
         }
 
         return response()->json([

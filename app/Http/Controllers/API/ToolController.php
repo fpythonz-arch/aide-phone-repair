@@ -12,6 +12,25 @@ use Illuminate\Support\Collection; // ← AJOUTER CECI
 class ToolController extends Controller
 {
     /**
+     * Liste tous les outils disponibles.
+     */
+    public function index(): JsonResponse
+    {
+        $tools = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $tools = array_merge($tools, $this->suggestToolsForDifficulty($i));
+        }
+        $tools = array_values(array_unique($tools));
+
+        return response()->json([
+            'data' => array_map(fn($tool) => [
+                'name' => $tool,
+                'estimated_price' => $this->estimateToolsCost(collect([$tool]))['breakdown'][0]['estimated_price'] ?? 0,
+            ], $tools),
+        ]);
+    }
+
+    /**
      * Liste les outils recommandés pour une réparation.
      */
         public function forRepair(Request $request): JsonResponse

@@ -1,0 +1,43 @@
+services:
+  - name: aide-phone-repair-backend
+    type: web
+    git:
+      repository: github.com/fpythonz-arch/aide-phone-repair
+      branch: main
+    docker:
+      dockerfile: backend/Dockerfile
+      context: backend
+    ports:
+      - port: 8000
+        protocol: http
+    env:
+      - key: APP_NAME
+        value: "AIDE PHONE REPARATION"
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        value: ""  # à remplir sur le dashboard Koyeb
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: db.rztrcsydxuybdavgoock.supabase.co
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        value: postgres
+      - key: DB_SSLMODE
+        value: require
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      - key: SESSION_DRIVER
+        value: cookie
+      - key: CACHE_STORE
+        value: array
+      - key: QUEUE_CONNECTION
+        value: sync

@@ -23,13 +23,13 @@ class SymptomController extends Controller
     }
 
     /**
-     * Symptômes par appareil (via table pivot)
+     * Symptômes par appareil - retourne tous les symptômes (pas de table pivot)
      */
     public function getByDevice(int $deviceId): JsonResponse
     {
-        $symptoms = Symptom::whereHas('devices', function ($query) use ($deviceId) {
-            $query->where('device_id', $deviceId);
-        })->get();
+        $symptoms = Symptom::orderBy('category')
+            ->orderBy('name')
+            ->get();
 
         return response()->json([
             'data' => $symptoms,

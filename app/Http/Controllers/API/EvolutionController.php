@@ -85,11 +85,28 @@ class EvolutionController extends Controller
      */
     public function store(StoreEvolutionEventRequest $request): JsonResponse
     {
-        $event = EvolutionEvent::create($request->validated());
+        $validated = $request->validated();
+
+        // Fallback symptom_id si absent (requis par le modèle)
+        if (empty($validated['symptom_id'])) {
+            $first = \App\Models\Symptom::first();
+            $validated['symptom_id'] = $first?->id ?? 1;
+        }
+
+        // Champs du modèle avec valeurs par défaut
+        $data = array_merge([
+            'severity_before'  => 2,
+            'severity_after'   => 2,
+            'device_brand'     => 'Non spécifié',
+            'device_model'     => 'Non spécifié',
+            'repair_attempted' => false,
+        ], $validated);
+
+        $event = EvolutionEvent::create($data);
 
         return response()->json([
-            'message' => 'Événement d\'évolution enregistré avec succès.',
-            'data' => new EvolutionEventResource($event),
+            'message' => 'Événement enregistré avec succès.',
+            'data'    => new EvolutionEventResource($event),
         ], 201);
     }
 

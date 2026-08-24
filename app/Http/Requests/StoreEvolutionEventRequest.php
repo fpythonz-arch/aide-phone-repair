@@ -14,63 +14,56 @@ class StoreEvolutionEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'symptom_id' => 'required|integer|exists:symptoms,id',
-            'component_id' => 'nullable|integer|exists:components,id',
-            'event_type' => 'required|string|in:symptom_worsening,symptom_improvement,new_symptom_appeared,repair_attempt,component_failure,temporary_fix,recurring_issue',
-            'description' => 'required|string|min:10|max:2000',
-            'severity_before' => 'required|integer|between:1,5',
-            'severity_after' => 'required|integer|between:1,5',
-            'device_model' => 'required|string|max:100',
-            'device_brand' => 'required|string|max:50',
-            'repair_attempted' => 'required|boolean',
-            'repair_successful' => 'nullable|boolean|required_if:repair_attempted,true',
-            'time_elapsed_days' => 'nullable|integer|min:1|max:365',
-            'environmental_factors' => 'nullable|array',
-            'environmental_factors.*' => 'string|max:50',
-            'user_notes' => 'nullable|string|max:1000',
-            'logged_by' => 'nullable|string|max:100',
+            'event_type'       => 'required|string|max:100',
+            'description'      => 'required|string|min:3|max:2000',
+            'device_id'        => 'nullable|string|max:100',
+            'device_brand'     => 'nullable|string|max:100',
+            'device_model'     => 'nullable|string|max:100',
+            'symptom_id'       => 'nullable|integer|exists:symptoms,id',
+            'component_id'     => 'nullable|integer|exists:components,id',
+            'severity'         => 'nullable|string|in:low,medium,high,critical',
+            'severity_before'  => 'nullable|integer|between:1,5',
+            'severity_after'   => 'nullable|integer|between:1,5',
+            'repair_attempted' => 'nullable|boolean',
+            'repair_successful'=> 'nullable|boolean',
+            'user_notes'       => 'nullable|string|max:1000',
+            'logged_by'        => 'nullable|string|max:100',
+            'technician'       => 'nullable|string|max:100',
+            'cost'             => 'nullable|numeric|min:0',
+            'status'           => 'nullable|string|in:completed,pending,cancelled',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'symptom_id.required' => 'Le symptôme associé est obligatoire.',
-            'symptom_id.exists' => 'Le symptôme sélectionné n\'existe pas.',
-            'event_type.required' => 'Le type d\'événement est obligatoire.',
-            'event_type.in' => 'Le type d\'événement doit être l\'un des suivants : aggravation, amélioration, nouveau symptôme, tentative de réparation, panne composant, réparation temporaire, problème récurrent.',
-            'severity_before.required' => 'La sévérité avant l\'événement est obligatoire.',
-            'severity_after.required' => 'La sévérité après l\'événement est obligatoire.',
-            'repair_successful.required_if' => 'Veuillez indiquer si la réparation a réussi.',
-            'description.min' => 'La description doit contenir au moins 10 caractères.',
+            'event_type.required'  => 'Le type d\'événement est obligatoire.',
+            'description.required' => 'La description est obligatoire.',
+            'description.min'      => 'La description doit contenir au moins 3 caractères.',
         ];
     }
 
-    public function attributes(): array
-    {
-        return [
-            'symptom_id' => 'symptôme',
-            'component_id' => 'composant',
-            'event_type' => 'type d\'événement',
-            'severity_before' => 'sévérité initiale',
-            'severity_after' => 'sévérité finale',
-            'device_model' => 'modèle d\'appareil',
-            'device_brand' => 'marque',
-            'repair_attempted' => 'tentative de réparation',
-            'repair_successful' => 'réparation réussie',
-            'time_elapsed_days' => 'temps écoulé',
-        ];
-    }
-
-    /**
-     * Prépare les données pour la validation.
-     */
     protected function prepareForValidation(): void
     {
-        if ($this->has('repair_attempted') && !$this->boolean('repair_attempted')) {
-            $this->merge([
-                'repair_successful' => null,
-            ]);
+        // Convertir severity string → niveaux numériques si absent
+        if ($this->has('severity') && !$this->has('severity_before')) {
+            $map = ['low' => 1, 'medium' => 2, 'high' => 4, 'critical' => 5];
+            $level = $map[$this->severity] ?? 2;
+            $this->merge(['severity_before' => $level, 'severity_after' => $level]);
+        }
+
+        // Valeurs par défaut obligatoires pour le modèle
+        if (!$this->has('device_brand')) {
+            $this->merge(['device_brand' => 'Non spécifié']);
+        }
+        if (!$this->has('device_model')) {
+            $this->merge(['device_model' => $this->device_id ?? 'Non spécifié']);
+        }
+        if (!$this->has('repair_attempted')) {
+            $this->merge(['repair_attempted' => false]);
+        }
+        if (!$this->has('severity_before')) {
+            $this->merge(['severity_before' => 2, 'severity_after' => 2]);
         }
     }
 }

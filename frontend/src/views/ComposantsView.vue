@@ -175,14 +175,6 @@
           </button>
         </div>
       </div>
-      <!-- DEBUG -->
-      <div class="bg-yellow-200 border-2 border-yellow-500 p-4 m-4 rounded-lg">
-        <p class="font-bold text-yellow-900">🔍 DEBUG:</p>
-        <p>softwareCount = {{ softwareCount }}</p>
-        <p>softwareComponents.length = {{ softwareComponents.length }}</p>
-        <p>paginatedSoftware.length = {{ paginatedSoftware.length }}</p>
-        <p>premier logiciel = {{ softwareComponents[0]?.name || 'AUCUN' }}</p>
-      </div>
       <!-- ════════════════════════════════════════ -->
       <!-- SECTION 2: COMPOSANTS LOGICIELS -->
       <!-- ════════════════════════════════════════ -->
@@ -323,11 +315,7 @@ const softwareComponents = computed(() =>
   filteredComponents.value.filter(c => c.category === 'logiciel')
 );
 
-// LOG TEMPORAIRE
-watch(softwareComponents, (val) => {
-  console.log('🟣 softwareComponents updated:', val.length, val.map(c => c.name));
-}, { immediate: true });
-
+// Pagination
 // Pagination
 const paginatedHardware = computed(() => {
   const start = (hardwarePage.value - 1) * itemsPerPage;

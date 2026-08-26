@@ -171,10 +171,12 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/vue/24/outline'
 import { useAuth } from '@/composables/useAuth'
+import { useRepairs } from '@/composables/useRepairs'
 import { useRouter } from 'vue-router'
 
 const uiStore = useUiStore()
-const { currentUser, logout } = useAuth()
+const { currentUser, isAuthenticated, logout } = useAuth()
+const { stats, fetchRepairs } = useRepairs()
 const router = useRouter()
 const isDark = ref(false)
 const drawerOpen = ref(false)
@@ -184,12 +186,7 @@ function handleLogout() {
   router.push('/login')
 }
 
-const pendingCount = computed(() => {
-  try {
-    const r = JSON.parse(localStorage.getItem('ap_repairs') || '[]')
-    return r.filter((x: any) => ['new', 'received', 'waiting_quote', 'waiting_parts', 'in_progress', 'diagnosing'].includes(x.status)).length
-  } catch { return 0 }
-})
+const pendingCount = computed(() => stats.value.active + stats.value.pending)
 
 function toggleDark() {
   isDark.value = !isDark.value
@@ -203,6 +200,7 @@ onMounted(() => {
     isDark.value = true
     document.documentElement.classList.add('dark')
   }
+  if (isAuthenticated.value) fetchRepairs()
 })
 </script>
 

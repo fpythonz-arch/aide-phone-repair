@@ -40,7 +40,9 @@ const router = createRouter({
 
 function isAuthenticated(): boolean {
   try {
-    return !!(localStorage.getItem('ap_session') || sessionStorage.getItem('ap_session'))
+    const hasToken = !!(localStorage.getItem('token') || sessionStorage.getItem('token'))
+    const hasSession = !!(localStorage.getItem('ap_session') || sessionStorage.getItem('ap_session'))
+    return hasToken && hasSession
   } catch {
     return false
   }

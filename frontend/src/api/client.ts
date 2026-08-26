@@ -18,6 +18,8 @@ import type {
   ProTool,
   Resource,
   CodeByModel,
+  Repair,
+  SessionUser,
 } from '@/types'
 
 // ============================================================
@@ -36,7 +38,7 @@ const apiClient: AxiosInstance = axios.create({
 // ── Intercepteur Requête ───────────────────────────────────
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -65,6 +67,9 @@ apiClient.interceptors.response.use(
 
     if (status === 401) {
       localStorage.removeItem('token')
+      localStorage.removeItem('ap_session')
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('ap_session')
       // Ne pas rediriger automatiquement, laisser le composant gérer
     }
     if (status === 422) {
@@ -85,6 +90,55 @@ export default apiClient
 export const healthApi = {
   check: () => apiClient.get<ApiResponse<{ status: string; version: string }>>('/health'),
   ping: () => apiClient.get<ApiResponse<{ pong: boolean }>>('/ping'),
+}
+
+// ── AUTHENTIFICATION ─────────────────────────────────────────
+export const authApi = {
+  /** Connexion — retourne un token Bearer + les infos utilisateur */
+  login: (email: string, password: string) =>
+    apiClient.post<ApiResponse<{ token: string; user: SessionUser }>>('/auth/login', { email, password }),
+
+  /** Déconnexion — révoque le token courant */
+  logout: () => apiClient.post<ApiResponse<{ success: boolean }>>('/auth/logout'),
+
+  /** Utilisateur actuellement authentifié */
+  me: () => apiClient.get<ApiResponse<SessionUser>>('/auth/me'),
+}
+
+// ── RÉPARATIONS ───────────────────────────────────────────────
+export const repairApi = {
+  /** Liste des réparations (filtres optionnels) */
+  getAll: (params?: { status?: string; priority?: string; search?: string; per_page?: number }) =>
+    apiClient.get<ApiResponse<Repair[]>>('/repairs', { params }),
+
+  /** Détail d'une réparation */
+  getById: (id: string) => apiClient.get<ApiResponse<Repair>>('/repairs/' + id),
+
+  /** Statistiques globales */
+  stats: () =>
+    apiClient.get<ApiResponse<{ total: number; active: number; pending: number; ready: number; completed: number; urgent: number }>>(
+      '/repairs/stats'
+    ),
+
+  /** Créer une réparation */
+  create: (data: Partial<Repair>) => apiClient.post<ApiResponse<Repair>>('/repairs', data),
+
+  /** Modifier une réparation */
+  update: (id: string, data: Partial<Repair>) => apiClient.put<ApiResponse<Repair>>('/repairs/' + id, data),
+
+  /** Changer uniquement le statut */
+  updateStatus: (id: string, status: string) =>
+    apiClient.patch<ApiResponse<Repair>>('/repairs/' + id + '/status', { status }),
+
+  /** Supprimer une réparation */
+  delete: (id: string) => apiClient.delete<ApiResponse<{ success: boolean }>>('/repairs/' + id),
+
+  /** Import ponctuel des réparations stockées localement (migration) */
+  import: (repairs: Repair[]) =>
+    apiClient.post<ApiResponse<{ imported: number; skipped: number; failed: number; errors: unknown[] }>>(
+      '/repairs/import',
+      { repairs }
+    ),
 }
 
 // ── APPAREILS ───────────────────────────────────────────────
@@ -308,6 +362,8 @@ export const resourceApi = {
 // ============================================================
 export const api = {
   health: healthApi,
+  auth: authApi,
+  repairs: repairApi,
   devices: deviceApi,
   diagnostic: diagnosticApi,
   symptoms: symptomApi,

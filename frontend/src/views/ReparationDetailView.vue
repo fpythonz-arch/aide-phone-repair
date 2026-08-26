@@ -1,6 +1,12 @@
 <template>
   <div class="animate-fade-in max-w-3xl mx-auto">
-    <div v-if="!repair" class="card">
+    <div v-if="loading" class="card">
+      <div class="empty-state">
+        <p class="empty-state-title">Chargement...</p>
+      </div>
+    </div>
+
+    <div v-else-if="!repair" class="card">
       <div class="empty-state">
         <ExclamationCircleIcon class="empty-state-icon" />
         <p class="empty-state-title">Réparation introuvable</p>
@@ -86,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeftIcon, PencilIcon, UserIcon, WrenchScrewdriverIcon, BanknotesIcon, DocumentTextIcon, ExclamationCircleIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { useRepairs } from '@/composables/useRepairs'
@@ -94,19 +100,29 @@ import { useUiStore } from '@/stores'
 import type { RepairStatus, RepairPriority } from '@/types'
 
 const route = useRoute(), router = useRouter()
-const { getById, updateStatus } = useRepairs()
+const { getById, updateStatus, fetchRepairById } = useRepairs()
 const uiStore = useUiStore()
 const repair = computed(() => getById(route.params.id as string))
+const loading = ref(true)
+
+onMounted(async () => {
+  if (!repair.value) await fetchRepairById(route.params.id as string)
+  loading.value = false
+})
 
 const STATUS_FLOW = [
   { v: 'received', l: 'Reçu' }, { v: 'diagnosing', l: 'Diagnostic' }, { v: 'in_progress', l: 'En cours' },
   { v: 'waiting_parts', l: 'Attente pièces' }, { v: 'testing', l: 'Tests' }, { v: 'ready', l: 'Prêt' }, { v: 'delivered', l: 'Livré' },
 ]
 
-function changeStatus(s: string) {
+async function changeStatus(s: string) {
   if (!repair.value) return
-  updateStatus(repair.value.id, s as RepairStatus)
-  uiStore.showSuccess(`Statut mis à jour : ${statusLabel(s)}`)
+  try {
+    await updateStatus(repair.value.id, s as RepairStatus)
+    uiStore.showSuccess(`Statut mis à jour : ${statusLabel(s)}`)
+  } catch {
+    uiStore.showError('Impossible de mettre à jour le statut')
+  }
 }
 
 const SL: Record<string,string> = { new:'Nouveau', received:'Reçu', diagnosing:'Diagnostic', waiting_quote:'Devis', quote_accepted:'Accepté', in_progress:'En cours', waiting_parts:'Pièces', testing:'Tests', ready:'Prêt', delivered:'Livré', cancelled:'Annulé' }

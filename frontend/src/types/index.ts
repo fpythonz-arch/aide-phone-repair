@@ -158,6 +158,9 @@ export interface EvolutionEvent {
 export interface Repair {
   id: string
   number: string
+  client_id?: string | null
+  device_id?: number | null
+  technician_id?: number | null
   client_name: string
   client_phone: string
   client_email?: string
@@ -178,6 +181,15 @@ export interface Repair {
   updated_at: string
   estimated_ready?: string
   warranty_days?: number
+}
+
+export interface SessionUser {
+  id: number
+  name: string
+  email: string
+  role: string
+  loggedAt?: string
+  remember?: boolean
 }
 
 export interface Client {

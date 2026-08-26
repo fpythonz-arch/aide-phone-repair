@@ -137,16 +137,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { PlusIcon, MagnifyingGlassIcon, WrenchScrewdriverIcon, EyeIcon, PencilIcon, TrashIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import { useRepairs } from '@/composables/useRepairs'
+import { useUiStore } from '@/stores'
 import type { Repair } from '@/types'
 
-const { repairs, stats, filterRepairs, deleteRepair } = useRepairs()
+const { repairs, stats, filterRepairs, deleteRepair, fetchRepairs } = useRepairs()
+const uiStore = useUiStore()
 const search = ref(''), filterStatus = ref('all'), filterPriority = ref('all'), toDelete = ref<Repair | null>(null)
 const filtered = computed(() => filterRepairs({ status: filterStatus.value, priority: filterPriority.value, search: search.value }))
 
-function doDelete() { if (toDelete.value) { deleteRepair(toDelete.value.id); toDelete.value = null } }
+onMounted(() => { fetchRepairs() })
+
+async function doDelete() {
+  if (!toDelete.value) return
+  const target = toDelete.value
+  toDelete.value = null
+  try {
+    await deleteRepair(target.id)
+    uiStore.showSuccess('Réparation supprimée')
+  } catch {
+    uiStore.showError('Impossible de supprimer la réparation')
+  }
+}
 
 const SL: Record<string,string> = { new:'Nouveau', received:'Reçu', diagnosing:'Diagnostic', waiting_quote:'Devis', quote_accepted:'Accepté', in_progress:'En cours', waiting_parts:'Pièces', testing:'Tests', ready:'Prêt', delivered:'Livré', cancelled:'Annulé' }
 const SB: Record<string,string> = { new:'badge-gray', received:'badge-blue', diagnosing:'badge-blue', waiting_quote:'badge-yellow', quote_accepted:'badge-purple', in_progress:'badge-blue', waiting_parts:'badge-orange', testing:'badge-purple', ready:'badge-green', delivered:'badge-green', cancelled:'badge-gray' }

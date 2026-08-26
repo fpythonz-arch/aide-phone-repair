@@ -139,13 +139,20 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import {
   WrenchScrewdriverIcon, CheckCircleIcon, EnvelopeIcon, LockClosedIcon,
   EyeIcon, EyeSlashIcon, ExclamationCircleIcon, ArrowRightIcon
 } from '@heroicons/vue/24/outline'
+import { useAuth } from '@/composables/useAuth'
+import { useRepairs } from '@/composables/useRepairs'
+import { useUiStore } from '@/stores'
 
+const route = useRoute()
 const router = useRouter()
+const { login } = useAuth()
+const { fetchRepairs } = useRepairs()
+const uiStore = useUiStore()
 const year = new Date().getFullYear()
 
 const form = ref({ email: '', password: '', remember: false })
@@ -168,12 +175,6 @@ const demoAccounts = [
   { name: 'Moussa Traoré',  email: 'moussa@atelier.com',  password: 'demo1234', role: 'Admin',             color: 'bg-purple-500' },
 ]
 
-// Comptes valides (simulés — à remplacer par vraie API)
-const VALID_ACCOUNTS = [
-  ...demoAccounts,
-  { email: 'admin@aidephone.com', password: 'admin123', name: 'Administrateur', role: 'Admin' },
-]
-
 function fillDemo(demo: typeof demoAccounts[0]) {
   form.value.email    = demo.email
   form.value.password = demo.password
@@ -184,33 +185,26 @@ async function handleLogin() {
   loading.value = true
   error.value   = ''
 
-  // Simulation délai réseau
-  await new Promise(r => setTimeout(r, 800))
+  const ok = await login(form.value.email, form.value.password, form.value.remember)
 
-  const account = VALID_ACCOUNTS.find(
-    a => a.email.toLowerCase() === form.value.email.toLowerCase() && a.password === form.value.password
-  )
-
-  if (account) {
-    // Stocker session
-    const session = {
-      name:      account.name,
-      email:     account.email,
-      role:      account.role,
-      loggedAt:  new Date().toISOString(),
-      remember:  form.value.remember,
+  if (ok) {
+    const migration = await migrateThenFetch()
+    if (migration && migration.imported > 0) {
+      uiStore.showSuccess(`${migration.imported} réparation(s) locale(s) importée(s)`)
     }
-    if (form.value.remember) {
-      localStorage.setItem('ap_session', JSON.stringify(session))
-    } else {
-      sessionStorage.setItem('ap_session', JSON.stringify(session))
-    }
-    router.push('/')
+    router.push((route.query.redirect as string) || '/')
   } else {
     error.value = 'Email ou mot de passe incorrect.'
   }
 
   loading.value = false
+}
+
+async function migrateThenFetch() {
+  const { migrateLocalRepairsIfNeeded } = useAuth()
+  const result = await migrateLocalRepairsIfNeeded()
+  await fetchRepairs(true)
+  return result
 }
 </script>
 

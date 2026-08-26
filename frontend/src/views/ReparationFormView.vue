@@ -120,12 +120,13 @@ import { useUiStore } from '@/stores'
 import type { Repair } from '@/types'
 
 const route = useRoute(), router = useRouter()
-const { getById, createRepair, updateRepair } = useRepairs()
+const { getById, createRepair, updateRepair, fetchRepairById } = useRepairs()
 const uiStore = useUiStore()
 
 const isEdit = computed(() => !!route.params.id && route.params.id !== 'nouvelle')
 const repair = computed(() => isEdit.value ? getById(route.params.id as string) : undefined)
 const submitting = ref(false)
+const loading = ref(false)
 const today = new Date().toISOString().split('T')[0]
 
 const BRANDS = ['Samsung', 'Apple', 'Xiaomi', 'Huawei', 'Tecno', 'Infinix', 'itel', 'Motorola', 'OPPO', 'realme', 'Google', 'Nokia', 'HP', 'Dell', 'Lenovo', 'Autre']
@@ -138,20 +139,33 @@ const f = ref<Omit<Repair, 'id'|'number'|'created_at'|'updated_at'>>({
   warranty_days: 30, estimated_ready: '', notes: '', parts_used: [],
 })
 
-onMounted(() => { if (isEdit.value && repair.value) f.value = { ...repair.value } })
+onMounted(async () => {
+  if (!isEdit.value) return
+  loading.value = true
+  try {
+    if (!repair.value) await fetchRepairById(route.params.id as string)
+    if (repair.value) f.value = { ...repair.value }
+  } finally {
+    loading.value = false
+  }
+})
 
 async function handleSubmit() {
   submitting.value = true
   try {
     if (isEdit.value && repair.value) {
-      updateRepair(repair.value.id, f.value)
+      await updateRepair(repair.value.id, f.value)
       uiStore.showSuccess('Réparation mise à jour')
       router.push(`/reparations/${repair.value.id}`)
     } else {
-      const r = createRepair(f.value)
+      const r = await createRepair(f.value)
       uiStore.showSuccess(`Réparation ${r.number} créée`)
       router.push('/reparations')
     }
-  } finally { submitting.value = false }
+  } catch {
+    uiStore.showError('Impossible d\'enregistrer la réparation')
+  } finally {
+    submitting.value = false
+  }
 }
 </script>

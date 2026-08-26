@@ -150,7 +150,9 @@ import {
 import { useRepairs } from '@/composables/useRepairs'
 import type { Repair, RepairStatus, RepairPriority } from '@/types'
 
-const { repairs, stats, filterRepairs } = useRepairs()
+const { repairs, stats, filterRepairs, fetchRepairs } = useRepairs()
+
+onMounted(() => { fetchRepairs() })
 
 const activeRepairs = computed(() =>
   filterRepairs({ status: 'all' }).filter(r => !['delivered', 'cancelled'].includes(r.status))

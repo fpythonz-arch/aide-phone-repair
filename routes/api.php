@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\DeviceController;
 use App\Http\Controllers\API\SymptomController;
 use App\Http\Controllers\API\DepannageController;
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\RepairController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +31,36 @@ Route::get('/health', function () {
 
 Route::get('/ping', function () {
     return response()->json(['pong' => true]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Auth Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Repair (Réparations) Routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('repairs')->middleware('auth:sanctum')->group(function () {
+    Route::get('/stats', [RepairController::class, 'stats']);
+    Route::post('/import', [RepairController::class, 'import']);
+    Route::get('/', [RepairController::class, 'index']);
+    Route::post('/', [RepairController::class, 'store']);
+    Route::get('/{repair}', [RepairController::class, 'show']);
+    Route::put('/{repair}', [RepairController::class, 'update']);
+    Route::patch('/{repair}/status', [RepairController::class, 'updateStatus']);
+    Route::delete('/{repair}', [RepairController::class, 'destroy']);
 });
 
 /*

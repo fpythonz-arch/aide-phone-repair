@@ -1,24 +1,12 @@
 import { ref, computed } from 'vue'
+import { repairApi } from '@/api/client'
 import type { Repair, RepairStatus } from '@/types'
 
-const STORAGE_KEY = 'ap_repairs'
 const repairs = ref<Repair[]>([])
-let initialized = false
-
-function load(): Repair[] {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') } catch { return [] }
-}
-function save(data: Repair[]) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)) }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7) }
-function nextNumber() {
-  const y = new Date().getFullYear()
-  const n = load().filter(r => r.number?.startsWith(`REP-${y}`)).length + 1
-  return `REP-${y}-${String(n).padStart(3, '0')}`
-}
+const loading = ref(false)
+const loaded = ref(false)
 
 export function useRepairs() {
-  if (!initialized) { repairs.value = load(); initialized = true }
-
   const stats = computed(() => ({
     total:     repairs.value.length,
     active:    repairs.value.filter(r => ['in_progress', 'diagnosing', 'testing'].includes(r.status)).length,
@@ -28,30 +16,65 @@ export function useRepairs() {
     urgent:    repairs.value.filter(r => r.priority === 'urgent').length,
   }))
 
-  function getById(id: string) { return repairs.value.find(r => r.id === id) }
-
-  function createRepair(data: Omit<Repair, 'id' | 'number' | 'created_at' | 'updated_at'>): Repair {
-    const now = new Date().toISOString()
-    const r: Repair = { ...data, id: uid(), number: nextNumber(), created_at: now, updated_at: now, currency: data.currency || 'FCFA', status: data.status || 'new', priority: data.priority || 'normal' }
-    repairs.value = [r, ...repairs.value]
-    save(repairs.value)
-    return r
+  async function fetchRepairs(force = false) {
+    if (loaded.value && !force) return repairs.value
+    loading.value = true
+    try {
+      const { data } = await repairApi.getAll({ per_page: 500 })
+      repairs.value = data.data
+      loaded.value = true
+      return repairs.value
+    } catch {
+      return repairs.value
+    } finally {
+      loading.value = false
+    }
   }
 
-  function updateRepair(id: string, data: Partial<Repair>): Repair | null {
-    const i = repairs.value.findIndex(r => r.id === id)
-    if (i === -1) return null
-    const updated = { ...repairs.value[i], ...data, updated_at: new Date().toISOString() }
-    repairs.value = [...repairs.value.slice(0, i), updated, ...repairs.value.slice(i + 1)]
-    save(repairs.value)
-    return updated
+  async function fetchRepairById(id: string) {
+    loading.value = true
+    try {
+      const { data } = await repairApi.getById(id)
+      upsert(data.data)
+      return data.data
+    } catch {
+      return null
+    } finally {
+      loading.value = false
+    }
   }
 
-  function updateStatus(id: string, status: RepairStatus) { return updateRepair(id, { status }) }
+  function upsert(repair: Repair) {
+    const i = repairs.value.findIndex(r => r.id === repair.id)
+    if (i === -1) repairs.value = [repair, ...repairs.value]
+    else repairs.value = [...repairs.value.slice(0, i), repair, ...repairs.value.slice(i + 1)]
+  }
 
-  function deleteRepair(id: string) {
+  function getById(id: string) {
+    return repairs.value.find(r => r.id === id)
+  }
+
+  async function createRepair(data: Omit<Repair, 'id' | 'number' | 'created_at' | 'updated_at'>): Promise<Repair> {
+    const { data: res } = await repairApi.create(data)
+    upsert(res.data)
+    return res.data
+  }
+
+  async function updateRepair(id: string, data: Partial<Repair>): Promise<Repair | null> {
+    const { data: res } = await repairApi.update(id, data)
+    upsert(res.data)
+    return res.data
+  }
+
+  async function updateStatus(id: string, status: RepairStatus) {
+    const { data: res } = await repairApi.updateStatus(id, status)
+    upsert(res.data)
+    return res.data
+  }
+
+  async function deleteRepair(id: string) {
+    await repairApi.delete(id)
     repairs.value = repairs.value.filter(r => r.id !== id)
-    save(repairs.value)
   }
 
   function filterRepairs(f: { status?: string; priority?: string; search?: string }) {
@@ -66,5 +89,17 @@ export function useRepairs() {
     return [...r].sort((a, b) => (ord[a.priority] ?? 2) - (ord[b.priority] ?? 2) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   }
 
-  return { repairs: computed(() => repairs.value), stats, getById, createRepair, updateRepair, updateStatus, deleteRepair, filterRepairs }
+  return {
+    repairs: computed(() => repairs.value),
+    loading: computed(() => loading.value),
+    stats,
+    fetchRepairs,
+    fetchRepairById,
+    getById,
+    createRepair,
+    updateRepair,
+    updateStatus,
+    deleteRepair,
+    filterRepairs,
+  }
 }

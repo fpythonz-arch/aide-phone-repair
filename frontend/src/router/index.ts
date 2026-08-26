@@ -2,11 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
+  // ── Vitrine publique ───────────────────────────────────────
+  { path: '/', name: 'home', component: () => import('@/views/LandingView.vue'), meta: { title: 'Accueil', public: true, blankLayout: true } },
+
   // ── Authentification ──────────────────────────────────────
-  { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Connexion', public: true } },
+  { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Connexion', public: true, blankLayout: true } },
 
   // ── Atelier ───────────────────────────────────────────────
-  { path: '/',                     name: 'dashboard',         component: () => import('@/views/AtelierDashboard.vue'),    meta: { title: 'Tableau de bord' } },
+  { path: '/dashboard',            name: 'dashboard',         component: () => import('@/views/AtelierDashboard.vue'),    meta: { title: 'Tableau de bord' } },
   { path: '/reparations',          name: 'reparations',       component: () => import('@/views/ReparationsView.vue'),     meta: { title: 'Réparations' } },
   { path: '/reparations/nouvelle', name: 'reparation-new',    component: () => import('@/views/ReparationFormView.vue'),  meta: { title: 'Nouvelle réparation' } },
   { path: '/reparations/:id',      name: 'reparation-detail', component: () => import('@/views/ReparationDetailView.vue'),meta: { title: 'Réparation' } },
@@ -59,8 +62,8 @@ router.beforeEach((to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
-  // Redirige vers dashboard si déjà connecté et tente d'accéder au login
-  if (to.name === 'login' && authenticated) {
+  // Redirige vers dashboard si déjà connecté et tente d'accéder à la vitrine ou au login
+  if ((to.name === 'login' || to.name === 'home') && authenticated) {
     return { name: 'dashboard' }
   }
 })

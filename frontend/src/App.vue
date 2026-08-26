@@ -1,5 +1,10 @@
 <template>
-  <div class="app-shell" :class="{ dark: isDark }">
+  <div :class="{ dark: isDark }">
+  <template v-if="isBlankLayout">
+    <router-view />
+  </template>
+
+  <div v-else class="app-shell">
 
     <!-- Sidebar desktop -->
     <aside class="sidebar">
@@ -12,7 +17,7 @@
 
       <nav class="sidebar-nav">
         <p class="sidebar-group-label">Atelier</p>
-        <router-link to="/" class="sidebar-link" :class="{ active: $route.path === '/' }">
+        <router-link to="/dashboard" class="sidebar-link" :class="{ active: $route.path === '/dashboard' }">
           <HomeIcon class="w-4 h-4 flex-shrink-0" /> Tableau de bord
         </router-link>
         <router-link to="/reparations" class="sidebar-link" :class="{ active: $route.path.startsWith('/reparations') }">
@@ -91,7 +96,7 @@
 
     <!-- Bottom nav mobile -->
     <nav class="bottom-nav">
-      <router-link to="/" class="bottom-nav-item" :class="{ active: $route.path === '/' }">
+      <router-link to="/dashboard" class="bottom-nav-item" :class="{ active: $route.path === '/dashboard' }">
         <HomeIcon class="w-5 h-5" /><span>Accueil</span>
       </router-link>
       <router-link to="/diagnostic" class="bottom-nav-item" :class="{ active: $route.path === '/diagnostic' }">
@@ -120,7 +125,7 @@
         </div>
         <nav class="mobile-drawer-nav">
           <p class="sidebar-group-label" style="margin-top:0">Atelier</p>
-          <router-link to="/" class="sidebar-link" @click="drawerOpen = false"><HomeIcon class="w-4 h-4" />Tableau de bord</router-link>
+          <router-link to="/dashboard" class="sidebar-link" @click="drawerOpen = false"><HomeIcon class="w-4 h-4" />Tableau de bord</router-link>
           <router-link to="/reparations" class="sidebar-link" @click="drawerOpen = false"><WrenchScrewdriverIcon class="w-4 h-4" />Réparations</router-link>
           <router-link to="/diagnostic" class="sidebar-link" @click="drawerOpen = false"><MagnifyingGlassIcon class="w-4 h-4" />Diagnostic</router-link>
           <p class="sidebar-group-label">Connaissances</p>
@@ -143,6 +148,7 @@
         </div>
       </div>
     </Transition>
+  </div>
 
     <!-- Toasts -->
     <div class="toast-portal" role="region" aria-live="polite">
@@ -172,14 +178,16 @@ import {
 } from '@heroicons/vue/24/outline'
 import { useAuth } from '@/composables/useAuth'
 import { useRepairs } from '@/composables/useRepairs'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const uiStore = useUiStore()
 const { currentUser, isAuthenticated, logout } = useAuth()
 const { stats, fetchRepairs } = useRepairs()
+const route = useRoute()
 const router = useRouter()
 const isDark = ref(false)
 const drawerOpen = ref(false)
+const isBlankLayout = computed(() => route.meta.blankLayout === true)
 
 function handleLogout() {
   logout()

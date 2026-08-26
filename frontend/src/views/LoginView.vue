@@ -192,7 +192,7 @@ async function handleLogin() {
     if (migration && migration.imported > 0) {
       uiStore.showSuccess(`${migration.imported} réparation(s) locale(s) importée(s)`)
     }
-    router.push((route.query.redirect as string) || '/')
+    router.push((route.query.redirect as string) || '/dashboard')
   } else {
     error.value = 'Email ou mot de passe incorrect.'
   }

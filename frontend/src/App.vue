@@ -47,10 +47,25 @@
       </nav>
 
       <div class="sidebar-footer">
+        <div v-if="currentUser" class="px-2 py-2 mb-1">
+          <div class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg bg-gray-50 dark:bg-slate-800">
+            <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {{ currentUser.name[0] }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentUser.name }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ currentUser.role }}</p>
+            </div>
+          </div>
+        </div>
         <button class="sidebar-link w-full" @click="toggleDark">
           <SunIcon v-if="isDark" class="w-4 h-4 flex-shrink-0" />
           <MoonIcon v-else class="w-4 h-4 flex-shrink-0" />
           {{ isDark ? 'Mode clair' : 'Mode sombre' }}
+        </button>
+        <button class="sidebar-link w-full text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" @click="handleLogout">
+          <ArrowRightOnRectangleIcon class="w-4 h-4 flex-shrink-0" />
+          Déconnexion
         </button>
       </div>
     </aside>
@@ -122,6 +137,9 @@
             <SunIcon v-if="isDark" class="w-4 h-4" /><MoonIcon v-else class="w-4 h-4" />
             {{ isDark ? 'Mode clair' : 'Mode sombre' }}
           </button>
+          <button class="sidebar-link w-full text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" @click="handleLogout">
+            <ArrowRightOnRectangleIcon class="w-4 h-4" />Déconnexion
+          </button>
         </div>
       </div>
     </Transition>
@@ -149,12 +167,22 @@ import {
   HomeIcon, WrenchScrewdriverIcon, MagnifyingGlassIcon, BoltIcon,
   CpuChipIcon, HashtagIcon, BookOpenIcon, CalculatorIcon, ChartBarIcon,
   SunIcon, MoonIcon, Bars3Icon, XMarkIcon, PlusIcon,
-  CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InformationCircleIcon
+  CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InformationCircleIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/vue/24/outline'
+import { useAuth } from '@/composables/useAuth'
+import { useRouter } from 'vue-router'
 
 const uiStore = useUiStore()
+const { currentUser, logout } = useAuth()
+const router = useRouter()
 const isDark = ref(false)
 const drawerOpen = ref(false)
+
+function handleLogout() {
+  logout()
+  router.push('/login')
+}
 
 const pendingCount = computed(() => {
   try {

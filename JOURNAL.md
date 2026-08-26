@@ -172,8 +172,8 @@ Transformer l'application prototype en produit professionnel utilisable dans un 
 ## En cours / À faire
 
 ### 🔴 Critique
-- [ ] Page de connexion (Login) avec authentification
-- [ ] Protection des routes (guard router)
+- [x] Page de connexion (Login) avec authentification — ✅ Session 3
+- [x] Protection des routes (guard router) — ✅ Session 3
 - [ ] Déployer les corrections backend sur Wasmer
 
 ### 🟠 Important

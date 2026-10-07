@@ -12,6 +12,7 @@ use App\Http\Controllers\API\SymptomController;
 use App\Http\Controllers\API\DepannageController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\RepairController;
+use App\Support\Roles;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +26,6 @@ Route::get('/health', function () {
         'service' => 'aide-phone-reparation-api',
         'version' => '1.0.0',
         'timestamp' => now()->toIso8601String(),
-        'environment' => app()->environment(),
     ]);
 });
 
@@ -39,7 +39,7 @@ Route::get('/ping', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -60,7 +60,8 @@ Route::prefix('repairs')->middleware('auth:sanctum')->group(function () {
     Route::get('/{repair}', [RepairController::class, 'show']);
     Route::put('/{repair}', [RepairController::class, 'update']);
     Route::patch('/{repair}/status', [RepairController::class, 'updateStatus']);
-    Route::delete('/{repair}', [RepairController::class, 'destroy']);
+    Route::delete('/{repair}', [RepairController::class, 'destroy'])
+        ->middleware('role:'.Roles::SENIOR);
 });
 
 /*
@@ -68,11 +69,10 @@ Route::prefix('repairs')->middleware('auth:sanctum')->group(function () {
 | MCP Protocol Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('mcp')->group(function () {
+Route::prefix('mcp')->middleware('mcp.auth')->group(function () {
     Route::get('/info', [MCPController::class, 'info']);
     Route::get('/servers', [MCPController::class, 'servers']);
-    Route::post('/', [MCPController::class, 'handle'])
-        ->middleware('mcp.auth');
+    Route::post('/', [MCPController::class, 'handle']);
 });
 
 /*
@@ -80,10 +80,10 @@ Route::prefix('mcp')->group(function () {
 | Diagnostic Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('diagnostic')->group(function () {
+Route::prefix('diagnostic')->middleware('auth:sanctum')->group(function () {
     Route::post('/initialize', [DiagnosticController::class, 'initialize']);
     Route::post('/analyze', [DiagnosticController::class, 'analyze']);
-    Route::post('/validate', [DiagnosticController::class, 'validateResults']); // CORRIGÉ ICI
+    Route::post('/validate', [DiagnosticController::class, 'validateResults']);
     Route::get('/next-steps', [DiagnosticController::class, 'nextSteps']);
     Route::get('/history', [DiagnosticController::class, 'history']);
 });
@@ -96,7 +96,7 @@ Route::prefix('diagnostic')->group(function () {
 Route::prefix('components')->group(function () {
     Route::get('/', [ComponentController::class, 'index']);
     Route::get('/categories', [ComponentController::class, 'categories']);
-    Route::post('/map', [ComponentController::class, 'mapBySymptoms']);
+    Route::post('/map', [ComponentController::class, 'mapBySymptoms'])->middleware('auth:sanctum');
     Route::get('/by-category/{category}', [ComponentController::class, 'byCategory']);
     Route::get('/compatible', [ComponentController::class, 'compatible']);
     Route::get('/{component}', [ComponentController::class, 'show']);
@@ -104,7 +104,6 @@ Route::prefix('components')->group(function () {
     Route::get('/{component}/alternatives', [ComponentController::class, 'alternatives']);
     Route::get('/components', [ComponentController::class, 'index']);
     Route::get('/components/{id}', [ComponentController::class, 'show']);
-    Route::get('/components/{slug}', [ComponentController::class, 'showBySlug']);
 });
 
 /*
@@ -117,8 +116,8 @@ Route::prefix('codes')->group(function () {
     Route::get('/categories', [CodeController::class, 'categories']);
     Route::get('/popular', [CodeController::class, 'popular']);
     Route::get('/statistics', [CodeController::class, 'statistics']);
-    Route::post('/resolve', [CodeController::class, 'resolve']);
-    Route::post('/validate', [CodeController::class, 'validateSafety']);
+    Route::post('/resolve', [CodeController::class, 'resolve'])->middleware('auth:sanctum');
+    Route::post('/validate', [CodeController::class, 'validateSafety'])->middleware('auth:sanctum');
     Route::get('/by-brand/{brand}', [CodeController::class, 'byBrand']);
     Route::get('/by-category/{category}', [CodeController::class, 'byCategory']);
     Route::get('/{code}', [CodeController::class, 'show']);
@@ -131,13 +130,16 @@ Route::prefix('codes')->group(function () {
 */
 Route::prefix('evolution')->group(function () {
     Route::get('/', [EvolutionController::class, 'index']);
-    Route::post('/', [EvolutionController::class, 'store']);
+    Route::post('/', [EvolutionController::class, 'store'])
+        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
     Route::get('/trends', [EvolutionController::class, 'trends']);
     Route::get('/timeline', [EvolutionController::class, 'timeline']);
     Route::get('/symptom/{symptomId}/stats', [EvolutionController::class, 'symptomStats']);
     Route::get('/{event}', [EvolutionController::class, 'show']);
-    Route::put('/{event}', [EvolutionController::class, 'update']);
-    Route::delete('/{event}', [EvolutionController::class, 'destroy']);
+    Route::put('/{event}', [EvolutionController::class, 'update'])
+        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
+    Route::delete('/{event}', [EvolutionController::class, 'destroy'])
+        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
 });
 
 /*
@@ -147,10 +149,9 @@ Route::prefix('evolution')->group(function () {
 */
 Route::prefix('tools')->group(function () {
     Route::get('/for-repair', [ToolController::class, 'forRepair']);
-    Route::post('/check-inventory', [ToolController::class, 'checkInventory']);
+    Route::post('/check-inventory', [ToolController::class, 'checkInventory'])->middleware('auth:sanctum');
     Route::get('/starter-kit', [ToolController::class, 'starterKit']);
     Route::get('/', [ToolController::class, 'index']);
-    Route::post('/{slug}/execute', [ToolController::class, 'execute']);
 });
 
 /*

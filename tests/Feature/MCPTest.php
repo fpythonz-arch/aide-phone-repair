@@ -12,7 +12,7 @@ class MCPTest extends TestCase
         protected function setUp(): void
     {
         parent::setUp();
-        config(['mcp.auth_token' => 'test-mcp-token']);
+        config(['mcp.authorized_keys' => ['test-mcp-token']]);
         
         // Crée les symptômes nécessaires
         \App\Models\Symptom::factory()->create(['name' => 'écran noir', 'severity_level' => 5]);
@@ -25,14 +25,14 @@ class MCPTest extends TestCase
     protected function postMcp(array $data): \Illuminate\Testing\TestResponse
     {
         return $this->withHeaders([
-            'X-API-Key' => config('mcp.auth_token'),
+            'X-API-Key' => 'test-mcp-token',
         ])->postJson('/api/mcp', $data);
     }
 
     /** @test */
     public function it_returns_mcp_info(): void
     {
-        $response = $this->getJson('/api/mcp/info');
+        $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/info');
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -50,7 +50,7 @@ class MCPTest extends TestCase
     /** @test */
     public function it_lists_available_servers(): void
     {
-        $response = $this->getJson('/api/mcp/servers');
+        $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/servers');
 
         $response->assertStatus(200)
             ->assertJsonStructure(['servers']);
@@ -167,11 +167,46 @@ class MCPTest extends TestCase
     /** @test */
     public function mcp_response_includes_capabilities(): void
     {
-        $response = $this->getJson('/api/mcp/info');
+        $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/info');
 
         $capabilities = $response->json('capabilities');
         $this->assertContains('diagnostic', $capabilities);
         $this->assertContains('component_mapping', $capabilities);
         $this->assertContains('code_resolution', $capabilities);
+    }
+
+    /** @test */
+    public function mcp_info_requires_an_api_key(): void
+    {
+        $this->getJson('/api/mcp/info')->assertStatus(401);
+    }
+
+    /** @test */
+    public function mcp_servers_requires_an_api_key(): void
+    {
+        $this->getJson('/api/mcp/servers')->assertStatus(401);
+    }
+
+    /** @test */
+    public function mcp_rejects_an_invalid_key_even_in_the_testing_environment(): void
+    {
+        // Régression : avant correction, toute clé était acceptée en environnement local/testing.
+        $this->withHeaders(['X-API-Key' => 'not-the-right-key'])
+            ->getJson('/api/mcp/servers')
+            ->assertStatus(401);
+
+        $this->withHeaders(['X-API-Key' => 'not-the-right-key'])
+            ->postJson('/api/mcp', ['jsonrpc' => '2.0', 'method' => 'x', 'id' => 1])
+            ->assertStatus(401);
+    }
+
+    /** @test */
+    public function mcp_is_closed_when_no_key_is_configured(): void
+    {
+        config(['mcp.authorized_keys' => []]);
+
+        $this->withHeaders(['X-API-Key' => 'anything'])
+            ->getJson('/api/mcp/info')
+            ->assertStatus(401);
     }
 }

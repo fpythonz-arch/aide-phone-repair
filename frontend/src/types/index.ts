@@ -52,7 +52,7 @@ export interface Component {
   price_range?: { min: number; max: number; currency: string } | string | null
   technical_specs?: Record<string, string> | string | null
   compatible_devices?: string[] | string
-  availability?: 'in_stock' | 'out_of_stock' | 'special_order' | 'not_available'
+  availability?: 'in_stock' | 'out_of_stock' | 'special_order' | 'not_available' | 'unknown'
   common_issues?: string[]
   repair_difficulty?: string
   average_repair_cost?: number
@@ -124,9 +124,10 @@ export interface DiagnosticResult {
   recommendedGuides?: RepairGuide[]
   repair_guides?: RepairGuide[]
   components?: Component[]
-  confidence?: number
+  confidence?: number | null
+  confidence_message?: string
   recommendations?: string[]
-  estimatedCost?: { min: number; max: number; currency: string }
+  estimatedCost?: { min: number; max: number; currency: string } | null
   severity: SeverityLevel
   canSelfRepair?: boolean
 }

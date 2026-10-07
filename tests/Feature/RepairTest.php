@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\Roles;
 use App\Models\Repair;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,9 +12,9 @@ class RepairTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function authHeaders(): array
+    protected function authHeaders(string $role = Roles::TECHNICIAN): array
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => $role]);
         $token = $user->createToken('test')->plainTextToken;
 
         return ['Authorization' => "Bearer {$token}"];
@@ -94,7 +95,7 @@ class RepairTest extends TestCase
     /** @test */
     public function it_deletes_a_repair(): void
     {
-        $headers = $this->authHeaders();
+        $headers = $this->authHeaders(Roles::SENIOR);
         $created = $this->postJson('/api/repairs', $this->payload(), $headers);
         $id = $created->json('data.id');
 

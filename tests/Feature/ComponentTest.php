@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\Roles;
 use App\Models\Component;
 use App\Models\Symptom;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,6 +11,8 @@ use Tests\TestCase;
 class ComponentTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected ?string $actingAsRole = Roles::TECHNICIAN;
 
     protected function setUp(): void
     {

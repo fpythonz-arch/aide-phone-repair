@@ -100,34 +100,6 @@
           </button>
         </form>
 
-        <!-- Séparateur -->
-        <div class="flex items-center gap-3 my-5">
-          <div class="flex-1 h-px bg-gray-200 dark:bg-slate-700" />
-          <span class="text-xs text-gray-400">Accès de démonstration</span>
-          <div class="flex-1 h-px bg-gray-200 dark:bg-slate-700" />
-        </div>
-
-        <!-- Comptes démo -->
-        <div class="space-y-2">
-          <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Connectez-vous rapidement avec un compte démo :</p>
-          <button
-            v-for="demo in demoAccounts"
-            :key="demo.email"
-            type="button"
-            class="w-full flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-left"
-            @click="fillDemo(demo)"
-          >
-            <div :class="['w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0', demo.color]">
-              {{ demo.name[0] }}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ demo.name }}</p>
-              <p class="text-xs text-gray-400 truncate">{{ demo.email }} · {{ demo.role }}</p>
-            </div>
-            <ArrowRightIcon class="w-4 h-4 text-gray-300 flex-shrink-0" />
-          </button>
-        </div>
-
         <p class="text-xs text-center text-gray-400 mt-6">
           Vous n'avez pas de compte ?
           <button type="button" class="text-blue-600 hover:underline dark:text-blue-400 font-medium">Contacter l'administrateur</button>
@@ -142,7 +114,7 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   WrenchScrewdriverIcon, CheckCircleIcon, EnvelopeIcon, LockClosedIcon,
-  EyeIcon, EyeSlashIcon, ExclamationCircleIcon, ArrowRightIcon
+  EyeIcon, EyeSlashIcon, ExclamationCircleIcon
 } from '@heroicons/vue/24/outline'
 import { useAuth } from '@/composables/useAuth'
 import { useRepairs } from '@/composables/useRepairs'
@@ -150,7 +122,7 @@ import { useUiStore } from '@/stores'
 
 const route = useRoute()
 const router = useRouter()
-const { login } = useAuth()
+const { login, loginError } = useAuth()
 const { fetchRepairs } = useRepairs()
 const uiStore = useUiStore()
 const year = new Date().getFullYear()
@@ -169,18 +141,6 @@ const features = [
   { text: 'Suivi des appareils et clients' },
 ]
 
-const demoAccounts = [
-  { name: 'Abdoul Diallo',  email: 'abdoul@atelier.com',  password: 'demo1234', role: 'Technicien senior', color: 'bg-blue-500' },
-  { name: 'Ibrahim Koné',   email: 'ibrahim@atelier.com', password: 'demo1234', role: 'Technicien',        color: 'bg-green-500' },
-  { name: 'Moussa Traoré',  email: 'moussa@atelier.com',  password: 'demo1234', role: 'Admin',             color: 'bg-purple-500' },
-]
-
-function fillDemo(demo: typeof demoAccounts[0]) {
-  form.value.email    = demo.email
-  form.value.password = demo.password
-  error.value = ''
-}
-
 async function handleLogin() {
   loading.value = true
   error.value   = ''
@@ -194,7 +154,7 @@ async function handleLogin() {
     }
     router.push((route.query.redirect as string) || '/dashboard')
   } else {
-    error.value = 'Email ou mot de passe incorrect.'
+    error.value = loginError.value || 'Connexion impossible. Réessayez.'
   }
 
   loading.value = false

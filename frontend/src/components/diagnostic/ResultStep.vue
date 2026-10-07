@@ -11,7 +11,7 @@
     <div v-if="result" class="severity-summary" :class="`severity-summary--${result.severity}`">
       <div class="severity-info">
         <SeverityBadge :severity="result.severity" />
-        <span class="confidence">Confiance : {{ Math.round(result.confidence * 100) }}%</span>
+        <span class="confidence">Confiance : {{ formatConfidence(result.confidence) }}</span>
       </div>
       <p class="recommendation-text">{{ mainRecommendation }}</p>
     </div>
@@ -175,6 +175,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatConfidence } from '@/utils/confidence'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { DiagnosticResult, Analysis, RepairGuide, Component } from '@/types'

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\Roles;
 use App\Models\EvolutionEvent;
 use App\Models\Symptom;
 use App\Models\Component;
@@ -11,6 +12,8 @@ use Tests\TestCase;
 class EvolutionTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected ?string $actingAsRole = Roles::SENIOR;
 
     protected function setUp(): void
     {

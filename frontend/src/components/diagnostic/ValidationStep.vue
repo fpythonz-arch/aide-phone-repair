@@ -44,7 +44,7 @@
           <span class="stat-label">Guides</span>
         </div>
         <div class="stat">
-          <span class="stat-value">{{ Math.round((result?.confidence || 0) * 100) }}%</span>
+          <span class="stat-value">{{ formatConfidence(result?.confidence) }}</span>
           <span class="stat-label">Confiance</span>
         </div>
       </div>
@@ -151,6 +151,7 @@
 </template>
 
 <script setup lang="ts">
+import { formatConfidence } from '@/utils/confidence'
 import { computed } from 'vue'
 import type { DiagnosticResult, Device } from '@/types'
 import SeverityBadge from './SeverityBadge.vue'

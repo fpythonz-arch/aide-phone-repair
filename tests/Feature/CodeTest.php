@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\Roles;
 use App\Models\SecretCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -9,6 +10,8 @@ use Tests\TestCase;
 class CodeTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected ?string $actingAsRole = Roles::TECHNICIAN;
 
     protected function setUp(): void
     {

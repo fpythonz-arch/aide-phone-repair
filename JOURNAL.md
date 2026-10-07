@@ -199,14 +199,12 @@ Transformer l'application prototype en produit professionnel utilisable dans un 
 
 ---
 
-## Techniciens de démo
+## Comptes de développement
 
-| Nom | Email | Mot de passe | Rôle |
-|-----|-------|--------------|------|
-| Abdoul Diallo | abdoul@atelier.com | demo1234 | Technicien senior |
-| Ibrahim Koné | ibrahim@atelier.com | demo1234 | Technicien |
-| Moussa Traoré | moussa@atelier.com | demo1234 | Admin |
-| Admin | admin@aidephone.com | admin123 | Admin |
+Aucun compte ni mot de passe de démonstration n'est stocké dans le dépôt.
+En local uniquement (`APP_ENV=local`), `php artisan db:seed --class=UserSeeder` crée trois comptes
+`@example.test` avec un **mot de passe aléatoire affiché une seule fois dans la console**.
+Le seeder refuse de s'exécuter en production.
 
 ---
 

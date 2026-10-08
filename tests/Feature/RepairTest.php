@@ -6,6 +6,7 @@ use App\Support\Roles;
 use App\Models\Repair;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class RepairTest extends TestCase
@@ -31,14 +32,14 @@ class RepairTest extends TestCase
         ], $overrides);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_unauthenticated_access(): void
     {
         $this->getJson('/api/repairs')->assertStatus(401);
         $this->postJson('/api/repairs', $this->payload())->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function it_creates_a_repair_with_a_generated_number(): void
     {
         $response = $this->postJson('/api/repairs', $this->payload(), $this->authHeaders());
@@ -49,7 +50,7 @@ class RepairTest extends TestCase
             ->assertJsonPath('data.priority', 'normal');
     }
 
-    /** @test */
+    #[Test]
     public function ticket_numbers_increment_sequentially(): void
     {
         $headers = $this->authHeaders();
@@ -64,7 +65,7 @@ class RepairTest extends TestCase
         $third->assertJsonPath('data.number', "REP-{$year}-003");
     }
 
-    /** @test */
+    #[Test]
     public function it_filters_by_status_priority_and_search(): void
     {
         $headers = $this->authHeaders();
@@ -80,7 +81,7 @@ class RepairTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-    /** @test */
+    #[Test]
     public function it_updates_status_via_dedicated_endpoint(): void
     {
         $headers = $this->authHeaders();
@@ -92,7 +93,7 @@ class RepairTest extends TestCase
             ->assertJsonPath('data.status', 'in_progress');
     }
 
-    /** @test */
+    #[Test]
     public function it_deletes_a_repair(): void
     {
         $headers = $this->authHeaders(Roles::SENIOR);
@@ -103,7 +104,7 @@ class RepairTest extends TestCase
         $this->getJson("/api/repairs/{$id}", $headers)->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_stats(): void
     {
         $headers = $this->authHeaders();
@@ -114,7 +115,7 @@ class RepairTest extends TestCase
             ->assertJsonPath('data.urgent', 1);
     }
 
-    /** @test */
+    #[Test]
     public function import_is_idempotent_when_replayed(): void
     {
         $headers = $this->authHeaders();
@@ -139,7 +140,7 @@ class RepairTest extends TestCase
         $this->assertEquals(1, Repair::query()->where('legacy_id', 'legacy-abc-123')->count());
     }
 
-    /** @test */
+    #[Test]
     public function import_preserves_distinct_repairs_sharing_the_same_legacy_number(): void
     {
         $headers = $this->authHeaders();

@@ -255,7 +255,7 @@ Mode hors ligne avec conflits de synchronisation explicites, module Training, in
 
 | Sujet | Raison |
 |-------|--------|
-| **Résultat des tests backend** | PHP n'est pas installé dans mon environnement et Packagist m'est bloqué (HTTP 403) : impossible d'installer les dépendances. Les tests sont lus, pas exécutés. |
+| **Résultat des tests backend** | *(Mis à jour)* Exécutés depuis : voir §13 et `docs/p0-lot1.md`. |
 | **État réel de la base de production** | Je n'ai pas accès à Supabase. Je ne sais pas si les comptes de démo y existent (mais S2 dit qu'ils sont recréés à chaque démarrage), ni si la table `symptom_component` est remplie, ni si le schéma a dérivé. |
 | **Variables d'environnement de production** | `.env` n'est pas dans le dépôt (bien). `APP_DEBUG`, `APP_ENV` et `MCP_API_KEYS` de production sont inconnus. |
 | **Le dépôt est-il cloné ailleurs ?** | Le token et les clés ont été publics pendant plusieurs semaines : suppose une compromission possible et vérifie l'activité récente sur GitHub (Settings → Security log) et sur Supabase (logs de connexion). |
@@ -288,5 +288,8 @@ Mode hors ligne avec conflits de synchronisation explicites, module Training, in
 | N5 | Le message « Email ou mot de passe incorrect » s'affichait pour toute panne (serveur injoignable, erreur 500). | Faible |
 | N6 | Les estimations de main-d'œuvre de `ComponentMapper::estimateProfessionalCost` reposent sur des coefficients inventés, en euros (le produit vise le FCFA). À traiter avec la base de prix (P2). | Moyenne |
 | N7 | Les coûts affichés par le module Dépannage (`useDepannage.ts`) sont des données statiques locales sans source. | Moyenne |
+| N8 | `EvolutionController::store` : sans `symptom_id`, l'événement est rattaché **au premier symptôme de la base** (ou au n° 1) : donnée inventée. La règle « `repair_successful` obligatoire si `repair_attempted` » a aussi été retirée. Deux tests restent en attente de décision produit (P1). | Moyenne |
+| N9 | `ComponentSeeder` (et d'autres) appliquent `json_encode()` à des colonnes qui ont déjà le cast `array` : les données sont **encodées deux fois** et l'API renvoie des chaînes au lieu de listes. Cela faisait planter `/components/{id}/alternatives` (500) ; le code tolère désormais ce format, mais les données restent à corriger. | Moyenne |
+| N10 | Avant ce lot, **47 tests sur 93 échouaient déjà** sur `main` (API de diagnostic et réponses MCP obsolètes, ordre de chargement des jeux de données, catégories renommées). La suite est maintenant entièrement verte. | Informatif |
 
-**Traité dans le lot P0 n° 1 (voir `docs/p0-lot1.md`) :** S2 (code), S3, S4, S5, S6, S7, S8, S9, S10, S13, N2, N3, N5, et la partie code de N1.
+**Traité dans le lot P0 n° 1 (voir `docs/p0-lot1.md`) :** S2 (code), S3, S4, S5, S6, S7, S8, S9, S10, S13, N2, N3, N4, N5, N10, la partie code de N1 et le plantage de N9. **Reste ouvert :** N6, N7, N8 et la correction des données de N9.

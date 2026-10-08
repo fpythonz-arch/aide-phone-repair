@@ -7,6 +7,7 @@ use App\Models\Symptom;
 use App\Services\ComponentMapper;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -23,7 +24,7 @@ class NoInventedProbabilityTest extends TestCase
         Cache::flush();
     }
 
-    /** @test */
+    #[Test]
     public function an_unknown_probability_stays_unknown(): void
     {
         $symptom = Symptom::factory()->create();
@@ -37,7 +38,7 @@ class NoInventedProbabilityTest extends TestCase
         $this->assertSame('unknown', $result->first()['probability_status']);
     }
 
-    /** @test */
+    #[Test]
     public function matching_several_symptoms_does_not_boost_the_probability(): void
     {
         $component = Component::factory()->create();
@@ -56,7 +57,7 @@ class NoInventedProbabilityTest extends TestCase
         $this->assertSame('catalog_value', $result->first()['probability_status']);
     }
 
-    /** @test */
+    #[Test]
     public function the_migration_leaves_no_default_probability_in_the_schema(): void
     {
         $symptom = Symptom::factory()->create();

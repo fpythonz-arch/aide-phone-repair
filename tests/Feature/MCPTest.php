@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MCPTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected \App\Models\Symptom $blackScreen;
 
         protected function setUp(): void
     {
@@ -15,7 +18,7 @@ class MCPTest extends TestCase
         config(['mcp.authorized_keys' => ['test-mcp-token']]);
         
         // Crée les symptômes nécessaires
-        \App\Models\Symptom::factory()->create(['name' => 'écran noir', 'severity_level' => 5]);
+        $this->blackScreen = \App\Models\Symptom::factory()->create(['name' => 'écran noir', 'severity_level' => 5]);
         
         $this->seed(\Database\Seeders\SymptomSeeder::class);
         $this->seed(\Database\Seeders\ComponentSeeder::class);
@@ -29,7 +32,7 @@ class MCPTest extends TestCase
         ])->postJson('/api/mcp', $data);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_mcp_info(): void
     {
         $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/info');
@@ -47,7 +50,7 @@ class MCPTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_lists_available_servers(): void
     {
         $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/servers');
@@ -56,7 +59,7 @@ class MCPTest extends TestCase
             ->assertJsonStructure(['servers']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_process_mcp_request(): void
     {
         $response = $this->postMcp([
@@ -64,7 +67,7 @@ class MCPTest extends TestCase
             'method' => 'diagnostic.analyze',
             'params' => [
                 'device' => ['brand' => 'Apple', 'model' => 'iPhone 14'],
-                'symptoms' => ['écran noir'],
+                'symptoms' => [$this->blackScreen->id],
             ],
             'id' => 'test-123',
         ]);
@@ -77,7 +80,7 @@ class MCPTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_error_for_unknown_method(): void
     {
         $response = $this->postMcp([
@@ -95,7 +98,7 @@ class MCPTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_requires_method_in_mcp_request(): void
     {
         $response = $this->postMcp([
@@ -108,7 +111,7 @@ class MCPTest extends TestCase
             ->assertJsonValidationErrors(['method']);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_jsonrpc_2_0_format(): void
     {
         $response = $this->postMcp([
@@ -122,7 +125,7 @@ class MCPTest extends TestCase
             ->assertJsonPath('id', 'format-test');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_call_component_server_via_mcp(): void
     {
         $response = $this->postMcp([
@@ -143,7 +146,7 @@ class MCPTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_call_codesecret_server_via_mcp(): void
     {
         $response = $this->postMcp([
@@ -164,7 +167,7 @@ class MCPTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function mcp_response_includes_capabilities(): void
     {
         $response = $this->withHeaders(['X-API-Key' => 'test-mcp-token'])->getJson('/api/mcp/info');
@@ -175,19 +178,19 @@ class MCPTest extends TestCase
         $this->assertContains('code_resolution', $capabilities);
     }
 
-    /** @test */
+    #[Test]
     public function mcp_info_requires_an_api_key(): void
     {
         $this->getJson('/api/mcp/info')->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function mcp_servers_requires_an_api_key(): void
     {
         $this->getJson('/api/mcp/servers')->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function mcp_rejects_an_invalid_key_even_in_the_testing_environment(): void
     {
         // Régression : avant correction, toute clé était acceptée en environnement local/testing.
@@ -200,7 +203,7 @@ class MCPTest extends TestCase
             ->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function mcp_is_closed_when_no_key_is_configured(): void
     {
         config(['mcp.authorized_keys' => []]);

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -33,7 +34,7 @@ class AuthTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_logs_in_with_valid_credentials(): void
     {
         $this->makeUser();
@@ -47,7 +48,7 @@ class AuthTest extends TestCase
             ->assertJsonStructure(['success', 'data' => ['token', 'user' => ['id', 'name', 'email', 'role']]]);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_wrong_password(): void
     {
         $this->makeUser();
@@ -58,13 +59,13 @@ class AuthTest extends TestCase
         ])->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function it_rejects_me_without_token(): void
     {
         $this->getJson('/api/auth/me')->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_current_user_with_valid_token(): void
     {
         $user = $this->makeUser();
@@ -75,7 +76,7 @@ class AuthTest extends TestCase
             ->assertJsonPath('data.email', 'tech@atelier.test');
     }
 
-    /** @test */
+    #[Test]
     public function logout_revokes_the_token(): void
     {
         // On vérifie la suppression en base plutôt qu'un second appel HTTP : le guard Sanctum
@@ -89,7 +90,7 @@ class AuthTest extends TestCase
         $this->assertEquals(0, PersonalAccessToken::count());
     }
 
-    /** @test */
+    #[Test]
     public function login_is_rate_limited_after_five_failed_attempts(): void
     {
         $this->makeUser();
@@ -107,7 +108,7 @@ class AuthTest extends TestCase
         ])->assertStatus(429);
     }
 
-    /** @test */
+    #[Test]
     public function tokens_expire(): void
     {
         $this->assertGreaterThan(0, (int) config('sanctum.expiration'), 'Les tokens ne doivent pas être éternels.');
@@ -121,7 +122,7 @@ class AuthTest extends TestCase
         $this->getJson('/api/auth/me', ['Authorization' => "Bearer {$token}"])->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function role_cannot_be_mass_assigned(): void
     {
         $this->assertNotContains('role', (new User())->getFillable());

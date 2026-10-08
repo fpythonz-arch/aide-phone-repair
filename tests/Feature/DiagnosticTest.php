@@ -7,6 +7,7 @@ use App\Models\Symptom;
 use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -28,7 +29,7 @@ class DiagnosticTest extends TestCase
         Cache::flush();
     }
 
-    /** @test */
+    #[Test]
     public function it_initializes_a_diagnostic_session(): void
     {
         $this->postJson('/api/diagnostic/initialize', ['brand' => 'Samsung', 'model' => 'A52'])
@@ -36,7 +37,7 @@ class DiagnosticTest extends TestCase
             ->assertJsonStructure(['data' => ['session_id', 'device' => ['brand', 'model']]]);
     }
 
-    /** @test */
+    #[Test]
     public function it_requires_device_brand_and_model(): void
     {
         $this->postJson('/api/diagnostic/initialize', ['brand' => 'Samsung'])
@@ -44,7 +45,7 @@ class DiagnosticTest extends TestCase
             ->assertJsonValidationErrors(['model']);
     }
 
-    /** @test */
+    #[Test]
     public function analyze_requires_symptoms(): void
     {
         $this->postJson('/api/diagnostic/analyze', [])
@@ -52,14 +53,14 @@ class DiagnosticTest extends TestCase
             ->assertJsonValidationErrors(['symptoms']);
     }
 
-    /** @test */
+    #[Test]
     public function analyze_rejects_unknown_symptom_ids(): void
     {
         $this->postJson('/api/diagnostic/analyze', ['symptoms' => [999999]])
             ->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function analyze_never_invents_a_confidence_or_a_cost(): void
     {
         $symptom = Symptom::factory()->create();

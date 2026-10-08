@@ -6,6 +6,7 @@ use App\Support\Roles;
 use App\Models\RepairGuide;
 use App\Models\Component;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ToolTest extends TestCase
@@ -25,7 +26,7 @@ class ToolTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_tools_for_a_repair_guide(): void
     {
         $guide = RepairGuide::first();
@@ -40,7 +41,7 @@ class ToolTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_tools_for_a_component(): void
     {
         $component = Component::first();
@@ -55,7 +56,7 @@ class ToolTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_tools_by_difficulty_level(): void
     {
         $response = $this->getJson('/api/tools/for-repair?difficulty_level=3');
@@ -64,7 +65,7 @@ class ToolTest extends TestCase
             ->assertJsonStructure(['tools']);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_error_without_parameters(): void
     {
         $response = $this->getJson('/api/tools/for-repair');
@@ -72,7 +73,7 @@ class ToolTest extends TestCase
         $response->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_check_tool_inventory(): void
     {
         $guide = RepairGuide::first();
@@ -101,7 +102,7 @@ class ToolTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_detects_missing_tools(): void
     {
         $guide = RepairGuide::factory()->create([
@@ -118,7 +119,7 @@ class ToolTest extends TestCase
             ->assertJsonPath('ready_to_repair', false);
     }
 
-    /** @test */
+    #[Test]
     public function it_shows_ready_when_all_tools_owned(): void
     {
         $guide = RepairGuide::factory()->create([
@@ -135,7 +136,7 @@ class ToolTest extends TestCase
             ->assertJsonPath('ready_to_repair', true);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_starter_kit(): void
     {
         $response = $this->getJson('/api/tools/starter-kit');
@@ -156,7 +157,7 @@ class ToolTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function starter_kit_includes_essential_tools(): void
     {
         $response = $this->getJson('/api/tools/starter-kit');
@@ -167,7 +168,7 @@ class ToolTest extends TestCase
         $this->assertContains('Spudger en plastique', $essential);
     }
 
-    /** @test */
+    #[Test]
     public function it_estimates_tool_costs_correctly(): void
     {
         $guide = RepairGuide::factory()->create([
@@ -184,7 +185,7 @@ class ToolTest extends TestCase
         $this->assertIsNumeric($cost);
     }
 
-    /** @test */
+    #[Test]
     public function it_suggests_suppliers(): void
     {
         $response = $this->getJson('/api/tools/starter-kit');

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\EvolutionEvent;
 use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -31,22 +33,20 @@ class RoleAccessTest extends TestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider protectedEndpoints
-     */
+    #[Test]
+    #[DataProvider('protectedEndpoints')]
     public function anonymous_users_are_rejected(string $method, string $uri): void
     {
         $this->json($method, $uri, [])->assertStatus(401);
     }
 
-    /** @test */
+    #[Test]
     public function catalogue_reads_remain_public(): void
     {
         $this->getJson('/api/devices/brands')->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function health_does_not_expose_the_environment(): void
     {
         $this->getJson('/api/health')
@@ -54,7 +54,7 @@ class RoleAccessTest extends TestCase
             ->assertJsonMissingPath('environment');
     }
 
-    /** @test */
+    #[Test]
     public function a_technician_cannot_write_evolution_events(): void
     {
         $event = EvolutionEvent::factory()->create();
@@ -65,7 +65,7 @@ class RoleAccessTest extends TestCase
         $this->deleteJson("/api/evolution/{$event->id}")->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function a_technician_cannot_delete_a_repair_but_a_senior_and_an_admin_can(): void
     {
         $this->actingAsRole(Roles::TECHNICIAN);
@@ -92,7 +92,7 @@ class RoleAccessTest extends TestCase
         $this->deleteJson("/api/repairs/{$ids[1]}")->assertOk();
     }
 
-    /** @test */
+    #[Test]
     public function the_admin_role_passes_every_role_gate(): void
     {
         $event = EvolutionEvent::factory()->create();

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Support\Roles;
 use App\Models\SecretCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CodeTest extends TestCase
@@ -19,7 +20,7 @@ class CodeTest extends TestCase
         $this->seed(\Database\Seeders\SecretCodeSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_list_all_codes(): void
     {
         $response = $this->getJson('/api/codes');
@@ -31,7 +32,7 @@ class CodeTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_filter_codes_by_category(): void
     {
         $response = $this->getJson('/api/codes?category=diagnostic');
@@ -43,7 +44,7 @@ class CodeTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_can_filter_codes_by_brand(): void
     {
         $response = $this->getJson('/api/codes?brand=Samsung');
@@ -51,7 +52,7 @@ class CodeTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_filter_verified_codes_only(): void
     {
         $response = $this->getJson('/api/codes?verified=1');
@@ -63,7 +64,7 @@ class CodeTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_can_search_codes(): void
     {
         $response = $this->getJson('/api/codes?search=*#0*#');
@@ -72,7 +73,7 @@ class CodeTest extends TestCase
         $this->assertGreaterThan(0, count($response->json('data')));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_show_a_specific_code(): void
     {
         $code = SecretCode::first();
@@ -93,7 +94,7 @@ class CodeTest extends TestCase
             ->assertJsonPath('data.id', $code->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_resolve_a_code(): void
     {
         $response = $this->postJson('/api/codes/resolve', [
@@ -108,7 +109,7 @@ class CodeTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_resolve_by_name(): void
     {
         $response = $this->postJson('/api/codes/resolve', [
@@ -119,7 +120,7 @@ class CodeTest extends TestCase
         $this->assertGreaterThan(0, $response->json('results_count'));
     }
 
-    /** @test */
+    #[Test]
     public function it_can_filter_resolve_by_brand(): void
     {
         $response = $this->postJson('/api/codes/resolve', [
@@ -130,7 +131,7 @@ class CodeTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function it_requires_input_for_resolve(): void
     {
         $response = $this->postJson('/api/codes/resolve', []);
@@ -139,7 +140,7 @@ class CodeTest extends TestCase
             ->assertJsonValidationErrors(['input']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_codes_by_brand(): void
     {
         $response = $this->getJson('/api/codes/by-brand/Samsung');
@@ -149,7 +150,7 @@ class CodeTest extends TestCase
             ->assertJsonStructure(['count', 'data']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_codes_by_category(): void
     {
         $response = $this->getJson('/api/codes/by-category/diagnostic');
@@ -158,7 +159,7 @@ class CodeTest extends TestCase
             ->assertJsonPath('category', 'diagnostic');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_validate_code_safety(): void
     {
         $response = $this->postJson('/api/codes/validate', [
@@ -178,7 +179,7 @@ class CodeTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_detects_high_risk_reset_codes(): void
     {
         $response = $this->postJson('/api/codes/validate', [
@@ -189,7 +190,7 @@ class CodeTest extends TestCase
             ->assertJsonPath('data.safe', false);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_popular_codes(): void
     {
         $response = $this->getJson('/api/codes/popular');
@@ -198,7 +199,7 @@ class CodeTest extends TestCase
             ->assertJsonStructure(['limit', 'data']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_popular_codes_with_limit(): void
     {
         $response = $this->getJson('/api/codes/popular?limit=5');
@@ -207,7 +208,7 @@ class CodeTest extends TestCase
             ->assertJsonPath('limit', 5);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_list_categories(): void
     {
         $response = $this->getJson('/api/codes/categories');
@@ -216,7 +217,7 @@ class CodeTest extends TestCase
             ->assertJsonStructure(['categories']);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_get_statistics(): void
     {
         $response = $this->getJson('/api/codes/statistics');

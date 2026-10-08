@@ -39,7 +39,8 @@ Codes d'erreur : `401` non authentifié, `403` droits insuffisants, `429` trop d
 
 ## Limites connues (non traitées dans ce lot)
 
-- Les tests n'ont pas pu être exécutés par l'auteur du lot (PHP sans accès à Packagist) : la CI GitHub Actions fournit le premier résultat réel.
+- Résultat de la suite backend : **111 tests réussis, 2 en attente de décision produit** (`EvolutionTest`, audit N8), 0 échec. Avant ce lot, 47 tests sur 93 échouaient déjà sur `main`.
+- Les données seedées sont encodées deux fois (audit N9) : l'API renvoie certaines listes sous forme de chaînes.
 - La limitation de connexion dépend du magasin de cache (`CACHE_STORE`) : avec `array`, elle ne persiste pas entre requêtes. Utiliser `database` ou `redis`/`file` en production.
 - Lectures du catalogue encore publiques (décision produit à prendre).
 - 190 erreurs de types TypeScript préexistantes (non bloquantes en CI).

@@ -277,6 +277,13 @@ class ComponentMapper
         ->where('category', $component->category)
         ->where(function ($query) use ($component) {
             $devices = $component->compatible_devices ?? [];
+
+            // Les données seedées peuvent contenir du JSON encodé deux fois : on tolère une chaîne.
+            if (is_string($devices)) {
+                $decoded = json_decode($devices, true);
+                $devices = is_array($decoded) ? $decoded : [];
+            }
+
             foreach ($devices as $device) {
                 $query->orWhereJsonContains('compatible_devices', $device);
             }

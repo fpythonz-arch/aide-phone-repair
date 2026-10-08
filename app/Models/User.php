@@ -23,8 +23,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
     ];
+
+    /**
+     * Le rôle n'est volontairement PAS dans $fillable : il ne doit jamais être
+     * modifiable via une requête utilisateur (élévation de privilèges).
+     * Pour le définir : $user->forceFill(['role' => ...])->save().
+     */
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->role, $roles, true);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

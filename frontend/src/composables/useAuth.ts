@@ -38,7 +38,16 @@ export function useAuth() {
 
       return true
     } catch (err: any) {
-      loginError.value = err.response?.data?.message || 'Email ou mot de passe incorrect.'
+      const status = err?.response?.status
+      if (status === 401 || status === 422) {
+        loginError.value = 'Email ou mot de passe incorrect.'
+      } else if (status === 429) {
+        loginError.value = 'Trop de tentatives. Patientez une minute avant de réessayer.'
+      } else if (!err?.response) {
+        loginError.value = 'Serveur injoignable. Vérifiez votre connexion internet.'
+      } else {
+        loginError.value = 'Erreur du serveur. Réessayez dans quelques instants.'
+      }
       return false
     } finally {
       loggingIn.value = false

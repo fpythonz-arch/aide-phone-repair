@@ -28,25 +28,30 @@ class ComponentMapper
 
             foreach ($symptoms as $symptom) {
                 foreach ($symptom->components as $component) {
-                    $probability = $component->pivot->probability ?? 50;
+                    // null = inconnu. Aucune valeur par défaut inventée.
+                    $probability = $component->pivot->probability;
                     $componentId = $component->id;
 
                     if (!$componentScores->has($componentId)) {
                         $componentScores->put($componentId, [
                             'component' => $component,
                             'total_probability' => 0,
+                            'known_count' => 0,
                             'match_count' => 0,
                             'symptoms' => collect(),
                         ]);
                     }
 
                     $current = $componentScores->get($componentId);
-                    $current['total_probability'] += $probability;
+                    if ($probability !== null) {
+                        $current['total_probability'] += (float) $probability;
+                        $current['known_count']++;
+                    }
                     $current['match_count']++;
                     $current['symptoms']->push([
                         'id' => $symptom->id,
                         'name' => $symptom->name,
-                        'probability' => $probability,
+                        'probability' => $probability !== null ? (float) $probability : null,
                     ]);
 
                     $componentScores->put($componentId, $current);
@@ -54,12 +59,11 @@ class ComponentMapper
             }
 
             return $componentScores->map(function ($data) {
-                $avgProbability = $data['match_count'] > 0
-                    ? $data['total_probability'] / $data['match_count']
-                    : 0;
-
-                $multiplier = min($data['match_count'], 3) * 0.15;
-                $finalProbability = min($avgProbability * (1 + $multiplier), 100);
+                // Moyenne des SEULES valeurs connues du catalogue ; null si aucune.
+                // Le bonus arbitraire (+15 % par symptôme) a été supprimé.
+                $avgProbability = $data['known_count'] > 0
+                    ? $data['total_probability'] / $data['known_count']
+                    : null;
 
                 return [
                     'id' => $data['component']->id,
@@ -67,7 +71,8 @@ class ComponentMapper
                     'category' => $data['component']->category,
                     'slug' => $data['component']->slug,
                     'description' => $data['component']->description,
-                    'probability' => round($finalProbability, 1),
+                    'probability' => $avgProbability !== null ? round($avgProbability, 1) : null,
+                    'probability_status' => $avgProbability !== null ? 'catalog_value' : 'unknown',
                     'match_count' => $data['match_count'],
                     'replacement_difficulty' => $data['component']->replacement_difficulty,
                     'price_range' => $data['component']->price_range,
@@ -78,8 +83,10 @@ class ComponentMapper
                     'common_failures' => $data['component']->common_failures,
                 ];
             })
-                ->filter(fn ($item) => $item['probability'] >= $this->probabilityThreshold)
-                ->sortByDesc('probability')
+                // Une probabilité inconnue n'est pas une probabilité faible : on ne l'écarte pas.
+                ->filter(fn ($item) => $item['probability'] === null || $item['probability'] >= $this->probabilityThreshold)
+                // Tri objectif : nombre de symptômes expliqués, puis valeur connue du catalogue.
+                ->sort(fn ($a, $b) => [$b['match_count'], $b['probability'] ?? -1.0] <=> [$a['match_count'], $a['probability'] ?? -1.0])
                 ->values();
         });
     }
@@ -223,7 +230,18 @@ class ComponentMapper
 
     protected function estimateProfessionalCost(Component $component): array
     {
-        $partsCost = $component->price_range['max'] ?? 50;
+        $partsCost = $component->price_range['max'] ?? null;
+
+        if ($partsCost === null) {
+            return [
+                'parts_cost' => null,
+                'labor_cost_estimate' => null,
+                'total_estimate' => ['min' => null, 'max' => null],
+                'currency' => null,
+                'note' => 'Prix inconnu dans la base : aucune estimation.',
+            ];
+        }
+
         $laborMultiplier = match ($component->replacement_difficulty) {
             1 => 1.5,
             2 => 2.0,
@@ -259,6 +277,13 @@ class ComponentMapper
         ->where('category', $component->category)
         ->where(function ($query) use ($component) {
             $devices = $component->compatible_devices ?? [];
+
+            // Les données seedées peuvent contenir du JSON encodé deux fois : on tolère une chaîne.
+            if (is_string($devices)) {
+                $decoded = json_decode($devices, true);
+                $devices = is_array($decoded) ? $decoded : [];
+            }
+
             foreach ($devices as $device) {
                 $query->orWhereJsonContains('compatible_devices', $device);
             }

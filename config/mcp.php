@@ -65,7 +65,7 @@ return [
         'header_name' => 'X-API-Key',
     ],
 
-    'authorized_keys' => explode(',', env('MCP_API_KEYS', '')),
+    'authorized_keys' => array_values(array_filter(array_map('trim', explode(',', (string) env('MCP_API_KEYS', ''))))),
 
     /*
     |--------------------------------------------------------------------------

@@ -93,7 +93,7 @@ class DiagnosticResultResource extends JsonResource
                 'id' => $component['id'] ?? null,
                 'name' => $component['name'] ?? 'Inconnu',
                 'category' => $component['category'] ?? null,
-                'probability' => $component['match_probability'] ?? ($component['probability'] ?? 0),
+                'probability' => $component['match_probability'] ?? ($component['probability'] ?? null),
                 'difficulty' => $component['replacement_difficulty'] ?? null,
                 'price_range' => $component['price_range'] ?? null,
             ];

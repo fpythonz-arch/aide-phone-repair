@@ -2,199 +2,75 @@
 
 namespace Tests\Feature;
 
+use App\Models\Component;
+use App\Models\Symptom;
+use App\Support\Roles;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Cache;
-use App\Models\Symptom; // Ajoute en haut
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
+/**
+ * Tests de l'API de diagnostic ACTUELLE (avant le futur moteur à sessions de l'étape P1).
+ * Ils vérifient surtout qu'aucune valeur technique n'est inventée.
+ */
 class DiagnosticTest extends TestCase
 {
     use RefreshDatabase;
 
-  protected function setUp(): void
-{
-    parent::setUp();
-    Cache::flush();
-    
-    // Crée les symptômes avec severity_level (pas severity)
-    Symptom::factory()->create(['name' => 'écran noir', 'severity_level' => 5]);
-    Symptom::factory()->create(['name' => 'ne s\'allume pas', 'severity_level' => 5]);
-    Symptom::factory()->create(['name' => 'batterie qui gonfle', 'severity_level' => 5]);
-    Symptom::factory()->create(['name' => 'batterie qui se décharge vite', 'severity_level' => 3]);
-    Symptom::factory()->create(['name' => 'pas de son', 'severity_level' => 3]);
-    Symptom::factory()->create(['name' => 'wifi déconnecte', 'severity_level' => 1]);
-}
+    protected ?string $actingAsRole = Roles::TECHNICIAN;
 
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_initialize_a_diagnostic(): void
+    private const INSUFFICIENT = 'Données insuffisantes pour estimer correctement cette hypothèse.';
+
+    protected function setUp(): void
     {
-        $response = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Apple',
-            'model' => 'iPhone 14 Pro',
-            'imei' => '123456789012345',
-            'os_version' => 'iOS 17.0',
-        ]);
+        parent::setUp();
 
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'session_id',
-                'status',
-                'message',
-                'brand',
-                'model',
-            ])
-            ->assertJson([
-                'status' => 'initialized',
-            ]);
+        Cache::flush();
     }
 
-#[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
+    public function it_initializes_a_diagnostic_session(): void
+    {
+        $this->postJson('/api/diagnostic/initialize', ['brand' => 'Samsung', 'model' => 'A52'])
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['session_id', 'device' => ['brand', 'model']]]);
+    }
+
+    #[Test]
     public function it_requires_device_brand_and_model(): void
     {
-        $response = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Apple',
-        ]);
-
-        $response->assertStatus(422)
+        $this->postJson('/api/diagnostic/initialize', ['brand' => 'Samsung'])
+            ->assertStatus(422)
             ->assertJsonValidationErrors(['model']);
     }
 
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_analyze_symptoms(): void
+    #[Test]
+    public function analyze_requires_symptoms(): void
     {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Samsung',
-            'model' => 'Galaxy S23',
-        ]);
-
-        $sessionId = $init->json('session_id');
-
-        $response = $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $sessionId,
-            'symptoms' => ['écran noir', 'ne s\'allume pas'],
-        ]);
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'session_id',
-                'status',
-                'result',
-            ]);
-    }
-
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_returns_error_for_unknown_symptoms(): void
-    {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Test',
-            'model' => 'Test',
-        ]);
-
-        $response = $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $init->json('session_id'),
-            'symptoms' => ['symptôme totalement inexistant xyz123'],
-        ]);
-
-        $response->assertStatus(422);
-    }
-
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_requires_symptoms_for_analysis(): void
-    {
-        $response = $this->postJson('/api/diagnostic/analyze', [
-            'symptoms' => [],
-        ]);
-
-        $response->assertStatus(422)
+        $this->postJson('/api/diagnostic/analyze', [])
+            ->assertStatus(422)
             ->assertJsonValidationErrors(['symptoms']);
     }
 
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_validate_diagnostic_results(): void
+    #[Test]
+    public function analyze_rejects_unknown_symptom_ids(): void
     {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Apple',
-            'model' => 'iPhone 13',
-        ]);
-
-        $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $init->json('session_id'),
-            'symptoms' => ['batterie qui se décharge vite'],
-        ]);
-
-        $response = $this->postJson('/api/diagnostic/validate', [
-            'session_id' => $init->json('session_id'),
-            'validation_results' => [
-                ['test' => 'test_batterie', 'confirmed' => true, 'notes' => 'Batterie gonflée visible'],
-                ['test' => 'test_charge', 'confirmed' => true],
-            ],
-        ]);
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'session_id',
-                'status',
-            ]);
+        $this->postJson('/api/diagnostic/analyze', ['symptoms' => [999999]])
+            ->assertStatus(422);
     }
 
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_get_next_steps(): void
+    #[Test]
+    public function analyze_never_invents_a_confidence_or_a_cost(): void
     {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Xiaomi',
-            'model' => '13',
-        ]);
+        $symptom = Symptom::factory()->create();
+        $component = Component::factory()->create();
+        $symptom->components()->attach($component->id, ['probability' => 50]);
 
-        $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $init->json('session_id'),
-            'symptoms' => ['pas de son'],
-        ]);
-
-        $response = $this->getJson('/api/diagnostic/next-steps?session_id=' . $init->json('session_id'));
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'session_id',
-                'next_steps',
-            ]);
-    }
-
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_can_get_diagnostic_history(): void
-    {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Google',
-            'model' => 'Pixel 7',
-        ]);
-
-        $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $init->json('session_id'),
-            'symptoms' => ['wifi déconnecte'],
-        ]);
-
-        $response = $this->getJson('/api/diagnostic/history?session_id=' . $init->json('session_id'));
-
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'session_id',
-                'history',
-            ]);
-    }
-
-#[\PHPUnit\Framework\Attributes\Test]
-    public function it_calculates_severity_correctly(): void
-    {
-        $init = $this->postJson('/api/diagnostic/initialize', [
-            'brand' => 'Test',
-            'model' => 'Test',
-        ]);
-
-        $response = $this->postJson('/api/diagnostic/analyze', [
-            'session_id' => $init->json('session_id'),
-            'symptoms' => ['batterie qui gonfle'],
-        ]);
-
-        $response->assertJsonPath('result.severity.level', 'critical')
-            ->assertJsonPath('result.severity.max', 5);
+        $this->postJson('/api/diagnostic/analyze', ['symptoms' => [$symptom->id]])
+            ->assertOk()
+            ->assertJsonPath('data.confidence', null)
+            ->assertJsonPath('data.confidence_message', self::INSUFFICIENT)
+            ->assertJsonPath('data.estimated_cost', null);
     }
 }

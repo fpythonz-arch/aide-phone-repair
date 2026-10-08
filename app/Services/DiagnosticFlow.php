@@ -61,7 +61,7 @@ class DiagnosticFlow
                     return [
                         'id' => $component->id,
                         'name' => $component->name,
-                        'probability' => $component->pivot->probability ?? 'high',
+                        'probability' => $component->pivot->probability ?? null,
                         'notes' => $component->pivot->notes ?? null,
                     ];
                 })->toArray(),
@@ -70,8 +70,8 @@ class DiagnosticFlow
                         'id' => $guide->id,
                         'title' => $guide->title,
                         'steps' => $guide->steps ?? [],
-                        'difficulty' => $guide->difficulty ?? 'medium',
-                        'estimated_time' => $guide->estimated_time ?? 30,
+                        'difficulty' => $guide->difficulty ?? null,
+                        'estimated_time' => $guide->estimated_time ?? null,
                         'tools_needed' => $guide->tools_needed ?? [],
                     ];
                 })->toArray(),
@@ -83,7 +83,7 @@ class DiagnosticFlow
                         'name' => $part->name,
                         'reference' => $part->reference,
                         'price_estimate' => $part->price_estimate,
-                        'availability' => $part->availability ?? 'in_stock',
+                        'availability' => $part->availability ?? 'unknown',
                     ];
                 })->toArray(),
             ];

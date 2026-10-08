@@ -87,14 +87,14 @@ class DiagnosticController extends Controller
                 'components' => $components,
                 'repair_guides' => $repairGuides,
                 'severity' => $severity,
-                'confidence' => 0.85,
+                // Aucune confiance inventée : sans données sourcées, on le dit.
+                'confidence' => null,
+                'confidence_message' => 'Données insuffisantes pour estimer correctement cette hypothèse.',
                 'recommendations' => $recommendations,
                 'estimated_time' => $estimatedTime,
-                'estimated_cost' => [
-                    'min' => $components->count() * 25,
-                    'max' => $components->count() * 85,
-                    'currency' => 'EUR',
-                ],
+                // Aucun prix sourcé dans la base pour estimer un coût de réparation.
+                'estimated_cost' => null,
+                'estimated_cost_message' => 'Coût inconnu : aucune source de prix dans la base.',
             ],
         ]);
     }

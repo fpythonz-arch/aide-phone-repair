@@ -48,8 +48,8 @@ class Engine
                 'validation' => $result
             ],
             'confidence_score' => $result['confidence'],
-            'estimated_time' => $repairGuide['estimated_time'] ?? '30-45 min',
-            'difficulty' => $repairGuide['difficulty'] ?? 'intermediate',
+            'estimated_time' => $repairGuide['estimated_time'] ?? null,
+            'difficulty' => $repairGuide['difficulty'] ?? null,
             'tools_required' => $repairGuide['tools'] ?? []
         ];
     }
@@ -154,14 +154,16 @@ class Engine
 
     private function validateAndScore(array $guide): array
     {
-        $confidence = min(0.95, 0.4 + (count($guide['steps']) * 0.15));
+        // Aucune confiance inventée (l'ancienne formule 0.4 + 0.15 × nb_étapes n'avait aucune base technique).
+        $hasGuide = count($guide['steps']) > 0;
 
         return [
-            'confidence' => round($confidence, 2),
-            'validation_passed' => $confidence > 0.5,
-            'recommendations' => $confidence < 0.7
-                ? ['Considérer une expertise en magasin']
-                : ['Diagnostic fiable - procéder à la réparation']
+            'confidence' => null,
+            'confidence_message' => 'Données insuffisantes pour estimer correctement cette hypothèse.',
+            'validation_passed' => $hasGuide,
+            'recommendations' => $hasGuide
+                ? ['Confirmer l\'hypothèse par un test ou une mesure avant de remplacer un composant']
+                : ['Aucun guide de réparation disponible dans la base pour ces symptômes']
         ];
     }
 

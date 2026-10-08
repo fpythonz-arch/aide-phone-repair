@@ -16,7 +16,11 @@ class MCPAuthMiddleware
 
     public function __construct()
     {
-        $this->apiKeys = config('mcp.authorized_keys', []);
+        // Les clés vides sont ignorées : une variable MCP_API_KEYS absente ne doit jamais autoriser personne.
+        $this->apiKeys = array_values(array_filter(
+            (array) config('mcp.authorized_keys', []),
+            fn ($key) => is_string($key) && $key !== ''
+        ));
     }
 
     public function handle(Request $request, Closure $next): Response
@@ -53,15 +57,18 @@ class MCPAuthMiddleware
 
     /**
      * Vérifie si la clé API est valide.
+     * Aucune exception selon l'environnement : même en local ou en test, une clé doit être configurée.
+     * Comparaison à temps constant pour éviter les attaques par mesure du temps de réponse.
      */
     protected function isValidApiKey(string $apiKey): bool
     {
-        // En production : vérifier en base de données ou cache Redis
-        if (app()->environment('local', 'testing')) {
-            return true; // Mode dev : tolérant
+        foreach ($this->apiKeys as $validKey) {
+            if (hash_equals($validKey, $apiKey)) {
+                return true;
+            }
         }
 
-        return in_array($apiKey, $this->apiKeys, true);
+        return false;
     }
 
     /**
@@ -103,7 +110,8 @@ class MCPAuthMiddleware
     {
         // En production : récupérer depuis la base de données
         return [
-            'key_id' => substr($apiKey, 0, 8) . '...',
+            // Empreinte non réversible : ne jamais exposer le début de la clé elle-même.
+            'key_id' => substr(hash('sha256', $apiKey), 0, 8),
             'permissions' => ['read', 'diagnostic', 'component_read'],
             'rate_limit_tier' => 'standard',
         ];

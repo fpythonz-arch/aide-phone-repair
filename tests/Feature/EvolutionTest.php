@@ -14,7 +14,10 @@ class EvolutionTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected ?string $actingAsRole = Roles::SENIOR;
+    protected ?string $actingAsRole = Roles::ADMIN;
+
+    /** L'évolution est une donnée commune à tous les ateliers : écriture réservée à la plateforme. */
+    protected array $actingAsAttributes = ['is_platform_admin' => true];
 
     protected function setUp(): void
     {

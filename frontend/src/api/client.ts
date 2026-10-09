@@ -20,6 +20,7 @@ import type {
   CodeByModel,
   Repair,
   SessionUser,
+  RegisterPayload,
 } from '@/types'
 
 // ============================================================
@@ -97,6 +98,10 @@ export const authApi = {
   /** Connexion — retourne un token Bearer + les infos utilisateur */
   login: (email: string, password: string) =>
     apiClient.post<ApiResponse<{ token: string; user: SessionUser }>>('/auth/login', { email, password }),
+
+  /** Inscription libre — crée un atelier privé et renvoie un token Bearer */
+  register: (payload: RegisterPayload) =>
+    apiClient.post<ApiResponse<{ token: string; user: SessionUser }>>('/auth/register', payload),
 
   /** Déconnexion — révoque le token courant */
   logout: () => apiClient.post<ApiResponse<{ success: boolean }>>('/auth/logout'),

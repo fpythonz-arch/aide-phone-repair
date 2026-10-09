@@ -102,7 +102,7 @@
 
         <p class="text-xs text-center text-gray-400 mt-6">
           Vous n'avez pas de compte ?
-          <button type="button" class="text-blue-600 hover:underline dark:text-blue-400 font-medium">Contacter l'administrateur</button>
+          <router-link to="/inscription" class="text-blue-600 hover:underline dark:text-blue-400 font-medium">Créer un compte gratuitement</router-link>
         </p>
       </div>
     </div>

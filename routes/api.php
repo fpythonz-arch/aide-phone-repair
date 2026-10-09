@@ -39,6 +39,7 @@ Route::get('/ping', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:register');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -131,15 +132,15 @@ Route::prefix('codes')->group(function () {
 Route::prefix('evolution')->group(function () {
     Route::get('/', [EvolutionController::class, 'index']);
     Route::post('/', [EvolutionController::class, 'store'])
-        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
+        ->middleware(['auth:sanctum', 'platform.admin']);
     Route::get('/trends', [EvolutionController::class, 'trends']);
     Route::get('/timeline', [EvolutionController::class, 'timeline']);
     Route::get('/symptom/{symptomId}/stats', [EvolutionController::class, 'symptomStats']);
     Route::get('/{event}', [EvolutionController::class, 'show']);
     Route::put('/{event}', [EvolutionController::class, 'update'])
-        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
+        ->middleware(['auth:sanctum', 'platform.admin']);
     Route::delete('/{event}', [EvolutionController::class, 'destroy'])
-        ->middleware(['auth:sanctum', 'role:'.Roles::SENIOR]);
+        ->middleware(['auth:sanctum', 'platform.admin']);
 });
 
 /*

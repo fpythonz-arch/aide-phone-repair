@@ -293,3 +293,18 @@ Mode hors ligne avec conflits de synchronisation explicites, module Training, in
 | N10 | Avant ce lot, **47 tests sur 93 échouaient déjà** sur `main` (API de diagnostic et réponses MCP obsolètes, ordre de chargement des jeux de données, catégories renommées). La suite est maintenant entièrement verte. | Informatif |
 
 **Traité dans le lot P0 n° 1 (voir `docs/p0-lot1.md`) :** S2 (code), S3, S4, S5, S6, S7, S8, S9, S10, S13, N2, N3, N4, N5, N10, la partie code de N1 et le plantage de N9. **Reste ouvert :** N6, N7, N8 et la correction des données de N9.
+
+---
+
+## 14. Lot 2 : ateliers privés et inscription libre (9 octobre 2026)
+
+Voir `docs/lot2-ateliers.md`. Traite l'isolation des données (S3) pour l'ouverture de l'inscription.
+
+**Constatations supplémentaires, découvertes en lançant la suite sur PostgreSQL (le moteur de production) :**
+
+| # | Constat | Gravité |
+|---|---------|---------|
+| N11 | `CodeResolver::popular` trie par `view_count`, colonne qui n'existe pas dans `secret_codes` (seulement dans `repair_guides`). SQLite l'ignore en silence ; **PostgreSQL renvoie une erreur** : `/api/codes/popular` renvoie très probablement une erreur 500 en production. | Moyenne |
+| N12 | Les seeders utilisent des identifiants fixes (`symptom_id => 1`…) : ils échouent sur PostgreSQL dans les tests, car les séquences ne sont pas remises à zéro. 44 tests de `CodeTest`, `ComponentTest`, `EvolutionTest` et `MCPTest` échouent sur PostgreSQL ; la CI actuelle tourne sur SQLite et ne le voit pas. À corriger avant de basculer la CI sur PostgreSQL. | Moyenne |
+| N13 | La numérotation des réparations est commune à tous les ateliers. | Faible |
+

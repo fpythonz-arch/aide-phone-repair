@@ -7,6 +7,7 @@ const routes: RouteRecordRaw[] = [
 
   // ── Authentification ──────────────────────────────────────
   { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Connexion', public: true, blankLayout: true } },
+  { path: '/inscription', name: 'register', component: () => import('@/views/RegisterView.vue'), meta: { title: 'Créer un compte', public: true, blankLayout: true } },
 
   // ── Atelier ───────────────────────────────────────────────
   { path: '/dashboard',            name: 'dashboard',         component: () => import('@/views/AtelierDashboard.vue'),    meta: { title: 'Tableau de bord' } },
@@ -63,7 +64,7 @@ router.beforeEach((to) => {
   }
 
   // Redirige vers dashboard si déjà connecté et tente d'accéder à la vitrine ou au login
-  if ((to.name === 'login' || to.name === 'home') && authenticated) {
+  if ((to.name === 'login' || to.name === 'register' || to.name === 'home') && authenticated) {
     return { name: 'dashboard' }
   }
 })

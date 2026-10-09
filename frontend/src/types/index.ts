@@ -184,11 +184,26 @@ export interface Repair {
   warranty_days?: number
 }
 
+export interface Workshop {
+  id: number
+  name: string
+}
+
+export interface RegisterPayload {
+  name: string
+  workshop_name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
+
 export interface SessionUser {
   id: number
   name: string
   email: string
   role: string
+  is_platform_admin?: boolean
+  workshop?: Workshop | null
   loggedAt?: string
   remember?: boolean
 }

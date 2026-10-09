@@ -23,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Inscription : 5 par minute et 30 par heure et par IP (plusieurs personnes peuvent partager une IP).
+        RateLimiter::for('register', function (Request $request) {
+            return [
+                Limit::perMinute(5)->by((string) $request->ip()),
+                Limit::perHour(30)->by((string) $request->ip()),
+            ];
+        });
+
         // Connexion : 5 essais/minute par couple email+IP, 30/minute par IP.
         RateLimiter::for('login', function (Request $request) {
             $email = Str::lower((string) $request->input('email'));

@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -30,6 +31,11 @@ class User extends Authenticatable
      * modifiable via une requête utilisateur (élévation de privilèges).
      * Pour le définir : $user->forceFill(['role' => ...])->save().
      */
+    public function workshop(): BelongsTo
+    {
+        return $this->belongsTo(Workshop::class);
+    }
+
     public function hasRole(string ...$roles): bool
     {
         return in_array($this->role, $roles, true);
@@ -55,6 +61,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_platform_admin' => 'boolean',
         ];
     }
 }

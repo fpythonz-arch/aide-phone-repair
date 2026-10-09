@@ -6,14 +6,15 @@
 |----------|---------|------------------|-------------|
 | `/api/health` | GET | Non | Aucun (n'expose plus l'environnement) |
 | `/api/auth/login` | POST | Non | Aucun · **5 essais/min** par e-mail+IP (429 ensuite) |
+| `/api/auth/register` | POST | Non | Aucun · voir `docs/lot2-ateliers.md` |
 | `/api/auth/me`, `/api/auth/logout` | GET, POST | Oui | Tous |
-| `/api/repairs` (liste, création, lecture, modification, import) | GET, POST, PUT | Oui | Tous (un technicien voit tout l'atelier) |
+| `/api/repairs` (liste, création, lecture, modification, import) | GET, POST, PUT | Oui | Tous · limité à **son atelier** |
 | `/api/repairs/{id}` | DELETE | Oui | Technicien senior ou Admin |
 | `/api/diagnostic/*` | tous | Oui | Tous |
 | `/api/components/map` | POST | Oui | Tous |
 | `/api/codes/resolve`, `/api/codes/validate` | POST | Oui | Tous |
 | `/api/tools/check-inventory` | POST | Oui | Tous |
-| `/api/evolution` | POST, PUT, DELETE | Oui | Technicien senior ou Admin |
+| `/api/evolution` | POST, PUT, DELETE | Oui | Administrateur de plateforme (voir `docs/lot2-ateliers.md`) |
 | `/api/mcp`, `/api/mcp/info`, `/api/mcp/servers` | GET, POST | Clé `X-API-Key` | Clé listée dans `MCP_API_KEYS` |
 | Lectures du catalogue (`devices`, `components`, `symptoms`, `codes`, `evolution` GET…) | GET | Non (inchangé) | Aucun |
 

@@ -14,19 +14,22 @@ abstract class TestCase extends BaseTestCase
      */
     protected ?string $actingAsRole = null;
 
+    /** Attributs supplémentaires de l'utilisateur authentifié (ex. is_platform_admin). */
+    protected array $actingAsAttributes = [];
+
     protected function setUp(): void
     {
         parent::setUp();
 
         if ($this->actingAsRole !== null) {
-            $this->actingAsRole($this->actingAsRole);
+            $this->actingAsRole($this->actingAsRole, $this->actingAsAttributes);
         }
     }
 
     /** Authentifie la suite du test avec un utilisateur du rôle donné. */
-    protected function actingAsRole(string $role): User
+    protected function actingAsRole(string $role, array $attributes = []): User
     {
-        $user = User::factory()->create(['role' => $role]);
+        $user = User::factory()->create(['role' => $role] + $attributes);
         Sanctum::actingAs($user);
 
         return $user;

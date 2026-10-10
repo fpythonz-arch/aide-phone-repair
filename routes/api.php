@@ -11,7 +11,9 @@ use App\Http\Controllers\API\DeviceController;
 use App\Http\Controllers\API\SymptomController;
 use App\Http\Controllers\API\DepannageController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\Admin\PlatformController;
 use App\Http\Controllers\API\RepairController;
+use App\Http\Controllers\API\WorkshopController;
 use App\Support\Roles;
 
 /*
@@ -70,6 +72,17 @@ Route::prefix('repairs')->middleware('auth:sanctum')->group(function () {
 | MCP Protocol Routes
 |--------------------------------------------------------------------------
 */
+// Espace « Mon atelier » : responsable (rôle Admin) de son propre atelier
+Route::prefix('workshop')->middleware(['auth:sanctum', 'role:'.Roles::ADMIN])->group(function () {
+    Route::get('/', [WorkshopController::class, 'show']);
+    Route::put('/', [WorkshopController::class, 'update']);
+});
+
+// Espace « Administration de la plateforme » : administrateurs de la plateforme uniquement
+Route::prefix('admin')->middleware(['auth:sanctum', 'platform.admin'])->group(function () {
+    Route::get('/overview', [PlatformController::class, 'overview']);
+});
+
 Route::prefix('mcp')->middleware('mcp.auth')->group(function () {
     Route::get('/info', [MCPController::class, 'info']);
     Route::get('/servers', [MCPController::class, 'servers']);

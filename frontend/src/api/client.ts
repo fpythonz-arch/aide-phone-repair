@@ -21,6 +21,8 @@ import type {
   Repair,
   SessionUser,
   RegisterPayload,
+  WorkshopDetails,
+  PlatformOverview,
 } from '@/types'
 
 // ============================================================
@@ -383,3 +385,14 @@ export const api = {
 }
 
 export type Api = typeof api
+
+/** Espace « Mon atelier » (responsable de l'atelier) */
+export const workshopApi = {
+  get: () => apiClient.get<ApiResponse<WorkshopDetails>>('/workshop'),
+  rename: (name: string) => apiClient.put<ApiResponse<{ id: number; name: string }>>('/workshop', { name }),
+}
+
+/** Espace « Administration » (administrateurs de la plateforme) */
+export const adminApi = {
+  overview: () => apiClient.get<ApiResponse<PlatformOverview>>('/admin/overview'),
+}

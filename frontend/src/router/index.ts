@@ -28,6 +28,10 @@ const routes: RouteRecordRaw[] = [
 
   // ── Outils & Performance ──────────────────────────────────
   { path: '/outils',    name: 'outils',    component: () => import('@/views/OutilsView.vue'),   meta: { title: 'Outils' } },
+  // ── Espaces séparés (protégés aussi côté serveur) ───────────
+  { path: '/atelier', name: 'workshop', component: () => import('@/views/WorkshopView.vue'), meta: { title: 'Mon atelier', requires: 'owner' } },
+  { path: '/admin', name: 'admin', component: () => import('@/views/AdminView.vue'), meta: { title: 'Administration', requires: 'platform' } },
+
   { path: '/evolution', name: 'evolution', component: () => import('@/views/EvolutionView.vue'), meta: { title: 'Évolution' } },
 
   // ── Fallback ──────────────────────────────────────────────
@@ -52,6 +56,15 @@ function isAuthenticated(): boolean {
   }
 }
 
+function storedUser(): { role?: string; is_platform_admin?: boolean } | null {
+  try {
+    const raw = localStorage.getItem('ap_session') || sessionStorage.getItem('ap_session')
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
 router.beforeEach((to) => {
   document.title = `${to.meta.title as string || 'Aide Phone'} — Aide Phone`
 
@@ -61,6 +74,14 @@ router.beforeEach((to) => {
   // Redirige vers login si non connecté et route protégée
   if (!publicRoute && !authenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }
+  }
+
+  // Espaces réservés : les menus sont masqués ET l'accès direct par l'adresse est refusé
+  const requires = to.meta.requires as 'platform' | 'owner' | undefined
+  if (requires) {
+    const user = storedUser()
+    const allowed = requires === 'platform' ? user?.is_platform_admin === true : user?.role === 'Admin'
+    if (!allowed) return { name: 'dashboard' }
   }
 
   // Redirige vers dashboard si déjà connecté et tente d'accéder à la vitrine ou au login

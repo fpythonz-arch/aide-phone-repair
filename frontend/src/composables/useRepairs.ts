@@ -6,6 +6,13 @@ const repairs = ref<Repair[]>([])
 const loading = ref(false)
 const loaded = ref(false)
 
+/** Vide les données en mémoire (à appeler à la déconnexion : jamais de données d'un compte chez un autre). */
+export function resetRepairs() {
+  repairs.value = []
+  loading.value = false
+  loaded.value = false
+}
+
 export function useRepairs() {
   const stats = computed(() => ({
     total:     repairs.value.length,

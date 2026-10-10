@@ -7,6 +7,8 @@
 | `/api/health` | GET | Non | Aucun (n'expose plus l'environnement) |
 | `/api/auth/login` | POST | Non | Aucun · **5 essais/min** par e-mail+IP (429 ensuite) |
 | `/api/auth/register` | POST | Non | Aucun · voir `docs/lot2-ateliers.md` |
+| `/api/workshop` | GET, PUT | Oui | Responsable d'atelier (rôle `Admin`) · voir `docs/espaces.md` |
+| `/api/admin/overview` | GET | Oui | Administrateur de plateforme · voir `docs/espaces.md` |
 | `/api/auth/me`, `/api/auth/logout` | GET, POST | Oui | Tous |
 | `/api/repairs` (liste, création, lecture, modification, import) | GET, POST, PUT | Oui | Tous · limité à **son atelier** |
 | `/api/repairs/{id}` | DELETE | Oui | Technicien senior ou Admin |

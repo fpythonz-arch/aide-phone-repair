@@ -7,6 +7,7 @@ const routes: RouteRecordRaw[] = [
 
   // ── Authentification ──────────────────────────────────────
   { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue'), meta: { title: 'Connexion', public: true, blankLayout: true } },
+  { path: '/rejoindre/:token', name: 'join', component: () => import('@/views/JoinView.vue'), meta: { title: 'Rejoindre un atelier', public: true, blankLayout: true } },
   { path: '/inscription', name: 'register', component: () => import('@/views/RegisterView.vue'), meta: { title: 'Créer un compte', public: true, blankLayout: true } },
 
   // ── Atelier ───────────────────────────────────────────────

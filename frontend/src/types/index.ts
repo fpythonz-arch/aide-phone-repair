@@ -214,6 +214,37 @@ export interface PlatformOverview {
   }>
 }
 
+export type InvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired'
+
+export interface WorkshopInvitation {
+  id: number
+  role: string
+  email: string | null
+  status: InvitationStatus
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+}
+
+/** Renvoyé une seule fois, à la création : le jeton n'est jamais réaffiché. */
+export interface CreatedInvitation extends WorkshopInvitation {
+  token: string
+}
+
+export interface InvitationInfo {
+  workshop_name: string
+  role: string
+  email: string | null
+  expires_at: string
+}
+
+export interface JoinPayload {
+  name: string
+  email: string
+  password: string
+  password_confirmation: string
+}
+
 export interface RegisterPayload {
   name: string
   workshop_name: string

@@ -64,7 +64,9 @@ class RequestLoggerMiddleware
         $context = [
             'request_id' => $requestId,
             'method' => $request->method(),
-            'path' => $request->path(),
+            // Modèle de la route (« api/invitations/{token} ») et non l'adresse réelle : un jeton
+            // d'invitation ou un identifiant ne doit jamais être écrit dans les journaux.
+            'path' => $request->route()?->uri() ?? $request->path(),
             'status_code' => $status,
             'duration_ms' => $duration,
             'user_id' => $request->user()?->getAuthIdentifier(),

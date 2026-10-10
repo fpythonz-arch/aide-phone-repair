@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
-import { authApi, repairApi } from '@/api/client'
+import { authApi, invitationApi, repairApi } from '@/api/client'
 import { resetRepairs } from '@/composables/useRepairs'
-import type { RegisterPayload, SessionUser } from '@/types'
+import type { JoinPayload, RegisterPayload, SessionUser } from '@/types'
 
 const session = ref<SessionUser | null>(null)
 
@@ -97,6 +97,44 @@ export function useAuth() {
     }
   }
 
+  /** Accepte une invitation : crée le compte dans l'atelier invitant et ouvre la session. */
+  async function joinWorkshop(inviteToken: string, payload: JoinPayload): Promise<boolean> {
+    registering.value = true
+    registerError.value = null
+    registerFieldErrors.value = {}
+    try {
+      const { data } = await invitationApi.accept(inviteToken, payload)
+      const { token, user } = data.data
+
+      const sessionData: SessionUser = { ...user, loggedAt: new Date().toISOString(), remember: false }
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('ap_session', JSON.stringify(sessionData))
+      session.value = sessionData
+
+      return true
+    } catch (err: any) {
+      const status = err?.response?.status
+      if (status === 422) {
+        const errors: Record<string, string[]> = err.response?.data?.errors ?? {}
+        for (const [field, messages] of Object.entries(errors)) {
+          registerFieldErrors.value[field] = messages[0]
+        }
+        registerError.value = 'Certaines informations sont à corriger.'
+      } else if (status === 404 || status === 410) {
+        registerError.value = err.response?.data?.message ?? 'Cette invitation n\'est plus valable.'
+      } else if (status === 429) {
+        registerError.value = 'Trop de tentatives. Réessayez dans quelques minutes.'
+      } else if (!err?.response) {
+        registerError.value = 'Serveur injoignable. Vérifiez votre connexion internet.'
+      } else {
+        registerError.value = 'Erreur du serveur. Réessayez dans quelques instants.'
+      }
+      return false
+    } finally {
+      registering.value = false
+    }
+  }
+
   function logout() {
     authApi.logout().catch(() => {})
     session.value = null
@@ -154,5 +192,5 @@ export function useAuth() {
     }
   }
 
-  return { isAuthenticated, currentUser, loginError, loggingIn, login, register, registerError, registerFieldErrors, registering, syncFromServer, logout, refreshSession, migrateLocalRepairsIfNeeded }
+  return { isAuthenticated, currentUser, loginError, loggingIn, login, register, joinWorkshop, registerError, registerFieldErrors, registering, syncFromServer, logout, refreshSession, migrateLocalRepairsIfNeeded }
 }

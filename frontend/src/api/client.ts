@@ -22,6 +22,10 @@ import type {
   SessionUser,
   RegisterPayload,
   WorkshopDetails,
+  WorkshopInvitation,
+  CreatedInvitation,
+  InvitationInfo,
+  JoinPayload,
   PlatformOverview,
 } from '@/types'
 
@@ -390,6 +394,22 @@ export type Api = typeof api
 export const workshopApi = {
   get: () => apiClient.get<ApiResponse<WorkshopDetails>>('/workshop'),
   rename: (name: string) => apiClient.put<ApiResponse<{ id: number; name: string }>>('/workshop', { name }),
+
+  invitations: () => apiClient.get<ApiResponse<WorkshopInvitation[]>>('/workshop/invitations'),
+  createInvitation: (role: string, email?: string) =>
+    apiClient.post<ApiResponse<CreatedInvitation>>('/workshop/invitations', email ? { role, email } : { role }),
+  revokeInvitation: (id: number) => apiClient.delete<ApiResponse<WorkshopInvitation>>(`/workshop/invitations/${id}`),
+
+  updateMember: (id: number, role: string) =>
+    apiClient.put<ApiResponse<{ id: number; name: string; role: string }>>(`/workshop/members/${id}`, { role }),
+  removeMember: (id: number) => apiClient.delete<{ success: boolean }>(`/workshop/members/${id}`),
+}
+
+/** Côté invité : vérifier puis accepter un lien d'invitation (avant connexion) */
+export const invitationApi = {
+  check: (token: string) => apiClient.get<ApiResponse<InvitationInfo>>(`/invitations/${encodeURIComponent(token)}`),
+  accept: (token: string, payload: JoinPayload) =>
+    apiClient.post<ApiResponse<{ token: string; user: SessionUser }>>(`/invitations/${encodeURIComponent(token)}/accept`, payload),
 }
 
 /** Espace « Administration » (administrateurs de la plateforme) */

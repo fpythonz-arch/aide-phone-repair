@@ -9,6 +9,8 @@
 | `/api/auth/register` | POST | Non | Aucun · voir `docs/lot2-ateliers.md` |
 | `/api/workshop` | GET, PUT | Oui | Responsable d'atelier (rôle `Admin`) · voir `docs/espaces.md` |
 | `/api/admin/overview` | GET | Oui | Administrateur de plateforme · voir `docs/espaces.md` |
+| `/api/workshop/invitations`, `/api/workshop/members/{id}` | GET, POST, PUT, DELETE | Oui | Responsable d'atelier · voir `docs/invitations.md` |
+| `/api/invitations/{token}`, `/api/invitations/{token}/accept` | GET, POST | Non (jeton secret) | Voir `docs/invitations.md` |
 | `/api/auth/me`, `/api/auth/logout` | GET, POST | Oui | Tous |
 | `/api/repairs` (liste, création, lecture, modification, import) | GET, POST, PUT | Oui | Tous · limité à **son atelier** |
 | `/api/repairs/{id}` | DELETE | Oui | Technicien senior ou Admin |

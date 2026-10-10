@@ -11,6 +11,12 @@ final class Roles
     public const SENIOR = 'Technicien senior';
     public const TECHNICIAN = 'Technicien';
 
+    /** Rôles attribuables par invitation : jamais Admin. @return list<string> */
+    public static function invitable(): array
+    {
+        return [self::TECHNICIAN, self::SENIOR];
+    }
+
     /** @return list<string> */
     public static function all(): array
     {

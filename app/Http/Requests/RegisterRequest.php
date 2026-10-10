@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests;
 
-use App\Models\User;
+use App\Rules\StrongPassword;
+use App\Rules\UniqueEmail;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 
@@ -25,26 +26,8 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:100'],
             'workshop_name' => ['required', 'string', 'max:100'],
-            'email' => [
-                'required', 'email:rfc', 'max:255',
-                function (string $attribute, mixed $value, \Closure $fail) {
-                    if (User::query()->whereRaw('LOWER(email) = ?', [Str::lower((string) $value)])->exists()) {
-                        $fail('Cette adresse e-mail est déjà utilisée.');
-                    }
-                },
-            ],
-            'password' => [
-                'required', 'string', 'max:200', 'confirmed',
-                function (string $attribute, mixed $value, \Closure $fail) {
-                    $value = (string) $value;
-
-                    if (mb_strlen($value) < 10) {
-                        $fail('Le mot de passe doit contenir au moins 10 caractères.');
-                    } elseif (! preg_match('/\p{L}/u', $value) || ! preg_match('/\d/', $value)) {
-                        $fail('Le mot de passe doit contenir au moins une lettre et un chiffre.');
-                    }
-                },
-            ],
+            'email' => ['required', 'email:rfc', 'max:255', new UniqueEmail()],
+            'password' => ['required', 'string', 'max:200', 'confirmed', new StrongPassword()],
         ];
     }
 

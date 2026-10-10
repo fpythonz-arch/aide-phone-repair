@@ -308,3 +308,16 @@ Voir `docs/lot2-ateliers.md`. Traite l'isolation des données (S3) pour l'ouvert
 | N12 | Les seeders utilisent des identifiants fixes (`symptom_id => 1`…) : ils échouent sur PostgreSQL dans les tests, car les séquences ne sont pas remises à zéro. 44 tests de `CodeTest`, `ComponentTest`, `EvolutionTest` et `MCPTest` échouent sur PostgreSQL ; la CI actuelle tourne sur SQLite et ne le voit pas. À corriger avant de basculer la CI sur PostgreSQL. | Moyenne |
 | N13 | La numérotation des réparations est commune à tous les ateliers. | Faible |
 
+---
+
+## 15. Lot 4 : invitations de techniciens (10 octobre 2026)
+
+Voir `docs/invitations.md`. L'espace « technicien » devient réel : un atelier peut avoir plusieurs membres.
+
+Vérifié : 24 tests dédiés (dont l'élévation de privilèges, l'usage unique, l'isolation entre ateliers, l'absence de jeton en base et dans les journaux), validés sur SQLite **et** sur PostgreSQL, plus un parcours complet sur un vrai serveur HTTP.
+
+| # | Constat | Gravité |
+|---|---------|---------|
+| N14 | Un membre retiré garde un compte inerte (sans atelier) : son e-mail reste pris et il ne peut pas être ré-invité. À traiter avec la suppression de comptes. | Faible |
+| N15 | Les journaux d'accès de l'hébergeur (Wasmer) enregistrent les adresses d'API, donc potentiellement un jeton d'invitation en attente. Atténué : usage unique, expiration à 7 jours, jeton jamais stocké en clair. | Faible |
+

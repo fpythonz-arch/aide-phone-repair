@@ -66,12 +66,27 @@ class RoleAccessTest extends TestCase
     }
 
     #[Test]
+    public function a_workshop_admin_cannot_write_evolution_events_but_a_platform_admin_can(): void
+    {
+        $event = EvolutionEvent::factory()->create();
+
+        // Administrateur d'ATELIER : ne peut pas modifier les données communes à la plateforme.
+        $this->actingAsRole(Roles::ADMIN);
+        $this->deleteJson("/api/evolution/{$event->id}")->assertStatus(403);
+
+        // Administrateur de PLATEFORME : autorisé.
+        $this->actingAsRole(Roles::TECHNICIAN, ['is_platform_admin' => true]);
+        $this->deleteJson("/api/evolution/{$event->id}")->assertOk();
+    }
+
+    #[Test]
     public function a_technician_cannot_delete_a_repair_but_a_senior_and_an_admin_can(): void
     {
-        $this->actingAsRole(Roles::TECHNICIAN);
+        $technician = $this->actingAsRole(Roles::TECHNICIAN);
+        $sameWorkshop = ['workshop_id' => $technician->workshop_id];
 
         $ids = [];
-        foreach ([1, 2, 3] as $n) {
+        foreach ([1, 2] as $n) {
             $created = $this->postJson('/api/repairs', [
                 'client_name' => 'Client Test '.$n,
                 'client_phone' => '+228 90 00 00 0'.$n,
@@ -85,19 +100,10 @@ class RoleAccessTest extends TestCase
 
         $this->deleteJson("/api/repairs/{$ids[0]}")->assertStatus(403);
 
-        $this->actingAsRole(Roles::SENIOR);
+        $this->actingAsRole(Roles::SENIOR, $sameWorkshop);
         $this->deleteJson("/api/repairs/{$ids[0]}")->assertOk();
 
-        $this->actingAsRole(Roles::ADMIN);
+        $this->actingAsRole(Roles::ADMIN, $sameWorkshop);
         $this->deleteJson("/api/repairs/{$ids[1]}")->assertOk();
-    }
-
-    #[Test]
-    public function the_admin_role_passes_every_role_gate(): void
-    {
-        $event = EvolutionEvent::factory()->create();
-        $this->actingAsRole(Roles::ADMIN);
-
-        $this->deleteJson("/api/evolution/{$event->id}")->assertOk();
     }
 }

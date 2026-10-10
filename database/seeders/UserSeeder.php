@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Workshop;
 use App\Support\Roles;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -31,6 +32,8 @@ class UserSeeder extends Seeder
             ['name' => 'Demo Technicien', 'email' => 'tech@example.test', 'role' => Roles::TECHNICIAN],
         ];
 
+        $workshop = Workshop::query()->firstOrCreate(['name' => 'Atelier de démonstration']);
+
         foreach ($accounts as $account) {
             $user = User::query()->firstOrNew(['email' => $account['email']]);
 
@@ -44,6 +47,8 @@ class UserSeeder extends Seeder
                 'name' => $account['name'],
                 'password' => $password, // haché par le cast "hashed" du modèle
                 'role' => $account['role'],
+                'workshop_id' => $workshop->id,
+                'is_platform_admin' => $account['role'] === Roles::ADMIN,
             ])->save();
 
             $this->command?->info("{$account['email']} (mot de passe local, affiché une fois) : {$password}");

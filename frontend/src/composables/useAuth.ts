@@ -1,6 +1,6 @@
 import { ref, computed } from 'vue'
 import { authApi, repairApi } from '@/api/client'
-import type { SessionUser } from '@/types'
+import type { RegisterPayload, SessionUser } from '@/types'
 
 const session = ref<SessionUser | null>(null)
 
@@ -21,6 +21,9 @@ export function useAuth() {
   const currentUser = computed(() => session.value)
   const loginError = ref<string | null>(null)
   const loggingIn = ref(false)
+  const registerError = ref<string | null>(null)
+  const registerFieldErrors = ref<Record<string, string>>({})
+  const registering = ref(false)
 
   async function login(email: string, password: string, remember = false): Promise<boolean> {
     loggingIn.value = true
@@ -51,6 +54,45 @@ export function useAuth() {
       return false
     } finally {
       loggingIn.value = false
+    }
+  }
+
+  /**
+   * Inscription libre : crée un compte et un atelier privé, puis ouvre la session.
+   * Aucune migration de données locales n'est faite ici : un nouveau compte démarre vide.
+   */
+  async function register(payload: RegisterPayload): Promise<boolean> {
+    registering.value = true
+    registerError.value = null
+    registerFieldErrors.value = {}
+    try {
+      const { data } = await authApi.register(payload)
+      const { token, user } = data.data
+
+      const sessionData: SessionUser = { ...user, loggedAt: new Date().toISOString(), remember: false }
+      sessionStorage.setItem('token', token)
+      sessionStorage.setItem('ap_session', JSON.stringify(sessionData))
+      session.value = sessionData
+
+      return true
+    } catch (err: any) {
+      const status = err?.response?.status
+      if (status === 422) {
+        const errors: Record<string, string[]> = err.response?.data?.errors ?? {}
+        for (const [field, messages] of Object.entries(errors)) {
+          registerFieldErrors.value[field] = messages[0]
+        }
+        registerError.value = 'Certaines informations sont à corriger.'
+      } else if (status === 429) {
+        registerError.value = 'Trop de créations de compte depuis cette connexion. Réessayez dans quelques minutes.'
+      } else if (!err?.response) {
+        registerError.value = 'Serveur injoignable. Vérifiez votre connexion internet.'
+      } else {
+        registerError.value = 'Erreur du serveur. Réessayez dans quelques instants.'
+      }
+      return false
+    } finally {
+      registering.value = false
     }
   }
 
@@ -93,5 +135,5 @@ export function useAuth() {
     }
   }
 
-  return { isAuthenticated, currentUser, loginError, loggingIn, login, logout, refreshSession, migrateLocalRepairsIfNeeded }
+  return { isAuthenticated, currentUser, loginError, loggingIn, login, register, registerError, registerFieldErrors, registering, logout, refreshSession, migrateLocalRepairsIfNeeded }
 }

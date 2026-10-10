@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\MCPException;
+use App\Http\Middleware\EnsurePlatformAdmin;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\MCPAuthMiddleware;
 use App\Http\Middleware\RequestLoggerMiddleware;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'mcp.auth' => MCPAuthMiddleware::class,
             'role' => EnsureUserHasRole::class,
+            'platform.admin' => EnsurePlatformAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

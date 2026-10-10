@@ -49,6 +49,20 @@
         <router-link to="/evolution" class="sidebar-link" :class="{ active: $route.path === '/evolution' }">
           <ChartBarIcon class="w-4 h-4 flex-shrink-0" /> Évolution
         </router-link>
+
+        <template v-if="isWorkshopOwner">
+          <p class="sidebar-group-label">Mon atelier</p>
+          <router-link to="/atelier" class="sidebar-link" :class="{ active: $route.path === '/atelier' }">
+            <BuildingStorefrontIcon class="w-4 h-4 flex-shrink-0" /> Gestion de l'atelier
+          </router-link>
+        </template>
+
+        <template v-if="isPlatformAdmin">
+          <p class="sidebar-group-label">Plateforme</p>
+          <router-link to="/admin" class="sidebar-link" :class="{ active: $route.path === '/admin' }">
+            <ShieldCheckIcon class="w-4 h-4 flex-shrink-0" /> Administration
+          </router-link>
+        </template>
       </nav>
 
       <div class="sidebar-footer">
@@ -59,7 +73,8 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-gray-900 dark:text-white truncate">{{ currentUser.name }}</p>
-              <p class="text-xs text-gray-400 truncate">{{ currentUser.role }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ roleLabel }}</p>
+              <p v-if="workshopName" class="text-xs text-gray-400 truncate">{{ workshopName }}</p>
             </div>
           </div>
         </div>
@@ -136,6 +151,8 @@
           <p class="sidebar-group-label">Outils</p>
           <router-link to="/outils" class="sidebar-link" @click="drawerOpen = false"><CalculatorIcon class="w-4 h-4" />Outils techniques</router-link>
           <router-link to="/evolution" class="sidebar-link" @click="drawerOpen = false"><ChartBarIcon class="w-4 h-4" />Évolution</router-link>
+          <router-link v-if="isWorkshopOwner" to="/atelier" class="sidebar-link" @click="drawerOpen = false"><BuildingStorefrontIcon class="w-4 h-4" />Gestion de l'atelier</router-link>
+          <router-link v-if="isPlatformAdmin" to="/admin" class="sidebar-link" @click="drawerOpen = false"><ShieldCheckIcon class="w-4 h-4" />Administration</router-link>
         </nav>
         <div class="mobile-drawer-footer">
           <button class="sidebar-link w-full" @click="toggleDark; drawerOpen = false">
@@ -174,14 +191,16 @@ import {
   CpuChipIcon, HashtagIcon, BookOpenIcon, CalculatorIcon, ChartBarIcon,
   SunIcon, MoonIcon, Bars3Icon, XMarkIcon, PlusIcon,
   CheckCircleIcon, ExclamationCircleIcon, ExclamationTriangleIcon, InformationCircleIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon, BuildingStorefrontIcon, ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 import { useAuth } from '@/composables/useAuth'
+import { usePermissions } from '@/composables/usePermissions'
 import { useRepairs } from '@/composables/useRepairs'
 import { useRoute, useRouter } from 'vue-router'
 
 const uiStore = useUiStore()
-const { currentUser, isAuthenticated, logout } = useAuth()
+const { currentUser, isAuthenticated, logout, syncFromServer } = useAuth()
+const { isPlatformAdmin, isWorkshopOwner, roleLabel, workshopName } = usePermissions()
 const { stats, fetchRepairs } = useRepairs()
 const route = useRoute()
 const router = useRouter()
@@ -203,6 +222,7 @@ function toggleDark() {
 }
 
 onMounted(() => {
+  if (isAuthenticated.value) syncFromServer()
   const saved = localStorage.getItem('ap_theme')
   if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     isDark.value = true

@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { authApi, repairApi } from '@/api/client'
+import { resetRepairs } from '@/composables/useRepairs'
 import type { RegisterPayload, SessionUser } from '@/types'
 
 const session = ref<SessionUser | null>(null)
@@ -99,10 +100,28 @@ export function useAuth() {
   function logout() {
     authApi.logout().catch(() => {})
     session.value = null
+    resetRepairs()
     localStorage.removeItem('token')
     localStorage.removeItem('ap_session')
     sessionStorage.removeItem('token')
     sessionStorage.removeItem('ap_session')
+  }
+
+  /**
+   * Met à jour le profil depuis le serveur (rôle, atelier, droits de plateforme).
+   * Évite d'afficher un espace périmé si les droits ont changé depuis la dernière connexion.
+   */
+  async function syncFromServer() {
+    if (!session.value) return
+    try {
+      const { data } = await authApi.me()
+      const updated = { ...session.value, ...data.data } as SessionUser
+      session.value = updated
+      const storage = updated.remember ? localStorage : sessionStorage
+      storage.setItem('ap_session', JSON.stringify(updated))
+    } catch {
+      // Un 401 est géré par l'intercepteur HTTP ; toute autre erreur est ignorée ici.
+    }
   }
 
   function refreshSession() {
@@ -135,5 +154,5 @@ export function useAuth() {
     }
   }
 
-  return { isAuthenticated, currentUser, loginError, loggingIn, login, register, registerError, registerFieldErrors, registering, logout, refreshSession, migrateLocalRepairsIfNeeded }
+  return { isAuthenticated, currentUser, loginError, loggingIn, login, register, registerError, registerFieldErrors, registering, syncFromServer, logout, refreshSession, migrateLocalRepairsIfNeeded }
 }

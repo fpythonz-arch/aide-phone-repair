@@ -189,6 +189,31 @@ export interface Workshop {
   name: string
 }
 
+export interface WorkshopMember {
+  id: number
+  name: string
+  email: string
+  role: string
+  created_at: string
+}
+
+export interface WorkshopDetails {
+  id: number
+  name: string
+  created_at: string
+  repairs_count: number
+  members: WorkshopMember[]
+}
+
+export interface PlatformOverview {
+  totals: { workshops: number; users: number; repairs: number }
+  workshops: Array<{ id: number; name: string; created_at: string; members_count: number; repairs_count: number }>
+  recent_users: Array<{
+    id: number; name: string; email: string; role: string
+    is_platform_admin: boolean; workshop: string | null; created_at: string
+  }>
+}
+
 export interface RegisterPayload {
   name: string
   workshop_name: string

@@ -3,6 +3,7 @@
     <div class="flex items-center justify-between">
       <h1 class="text-3xl font-bold text-gray-900 dark:text-white">📈 Suivi d'Évolution</h1>
       <button
+        v-if="canManageEvolution"
         class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 dark:bg-primary-500 text-white text-sm font-medium rounded-md shadow-sm hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
         @click="showAddEvent = true"
       >
@@ -113,12 +114,14 @@
 </template>
 
 <script setup lang="ts">
+import { usePermissions } from '@/composables/usePermissions'
 import { ref, onMounted } from 'vue'
 import { useEvolution } from '@/composables/useEvolution'
 import Timeline from '@/components/evolution/Timeline.vue'
 import type { EvolutionEvent } from '@/types'
 
 const { events, loading, fetchEvents, addEvent } = useEvolution()
+const { canManageEvolution } = usePermissions()
 
 const deviceId = ref('')
 const showAddEvent = ref(false)

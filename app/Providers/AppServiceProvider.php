@@ -23,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Vérification d'un lien d'invitation : 30 par minute et par IP (les jetons sont de toute façon indevinables).
+        RateLimiter::for('invitation-check', function (Request $request) {
+            return Limit::perMinute(30)->by((string) $request->ip());
+        });
+
         // Inscription : 5 par minute et 30 par heure et par IP (plusieurs personnes peuvent partager une IP).
         RateLimiter::for('register', function (Request $request) {
             return [

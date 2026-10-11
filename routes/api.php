@@ -12,7 +12,10 @@ use App\Http\Controllers\API\SymptomController;
 use App\Http\Controllers\API\DepannageController;
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\Admin\PlatformController;
+use App\Http\Controllers\API\InvitationController;
 use App\Http\Controllers\API\RepairController;
+use App\Http\Controllers\API\WorkshopInvitationController;
+use App\Http\Controllers\API\WorkshopMemberController;
 use App\Http\Controllers\API\WorkshopController;
 use App\Support\Roles;
 
@@ -76,6 +79,19 @@ Route::prefix('repairs')->middleware('auth:sanctum')->group(function () {
 Route::prefix('workshop')->middleware(['auth:sanctum', 'role:'.Roles::ADMIN])->group(function () {
     Route::get('/', [WorkshopController::class, 'show']);
     Route::put('/', [WorkshopController::class, 'update']);
+
+    Route::get('/invitations', [WorkshopInvitationController::class, 'index']);
+    Route::post('/invitations', [WorkshopInvitationController::class, 'store']);
+    Route::delete('/invitations/{id}', [WorkshopInvitationController::class, 'destroy'])->whereNumber('id');
+
+    Route::put('/members/{id}', [WorkshopMemberController::class, 'update'])->whereNumber('id');
+    Route::delete('/members/{id}', [WorkshopMemberController::class, 'destroy'])->whereNumber('id');
+});
+
+// Côté invité : vérifier puis accepter un lien d'invitation (avant connexion)
+Route::prefix('invitations')->group(function () {
+    Route::get('/{token}', [InvitationController::class, 'show'])->middleware('throttle:invitation-check');
+    Route::post('/{token}/accept', [InvitationController::class, 'accept'])->middleware('throttle:register');
 });
 
 // Espace « Administration de la plateforme » : administrateurs de la plateforme uniquement

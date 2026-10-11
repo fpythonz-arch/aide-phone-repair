@@ -48,7 +48,7 @@ Les migrations Laravel équivalentes existent mais ne sont pas exécutées autom
 
 - Numérotation des réparations (`REP-AAAA-NNN`) commune à la plateforme et non par atelier.
 - Pas de vérification de l'adresse e-mail, ni de « mot de passe oublié » (nécessitent l'envoi d'e-mails).
-- Pas encore d'invitation de techniciens dans un atelier existant.
+- Les techniciens rejoignent un atelier par invitation (voir `docs/invitations.md`).
 - Un compte reste sans limite de durée de conservation des données.
 - Les données de démonstration de l'ancien navigateur (`localStorage`) ne sont pas importées pour un nouveau compte (volontaire).
 - La suite de tests est exécutée sur SQLite ; 44 tests de classes antérieures échouent sur PostgreSQL (voir audit N11).

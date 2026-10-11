@@ -29,4 +29,4 @@ Un compte créé par inscription est **Responsable de son propre atelier**, jama
 
 ## Pas encore construits
 
-Espace **Client** (suivi de sa réparation par lien ou QR code) et espace **Apprenant** (formation). L'invitation de techniciens dans un atelier existant n'est pas non plus faite : tant qu'elle ne l'est pas, l'équipe d'un atelier se limite à son responsable.
+Espace **Client** (suivi de sa réparation par lien ou QR code) et espace **Apprenant** (formation). Les techniciens rejoignent un atelier par **invitation** (voir `docs/invitations.md`).
